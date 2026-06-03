@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes"/>
+<title>FARO — Fichero Analítico de Registro y Observación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<!-- pdf.js — extracción local de PDFs, sin servidor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (window.pdfjsLib) {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+</script>
+<!-- mammoth.js — extracción local de .docx, sin servidor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── LIGHT THEME (predeterminado) ── */
+[data-theme="light"]{
+  --bg:#F5EDD4;--bg2:#FEFAF2;--bg3:#F0E8D0;
+  --border:#C4B49A;--border2:#D4C9B0;
+  --text:#1C1C14;--text2:#5C5040;--text3:#8A7A68;--text4:#B0A28E;
+  --green-dark:#1E3A2F;--green-mid:#2D6A4F;--green-pale:#1A3328;
+  --amber:#B85C38;--purple:#7B5EA7;--blue:#2A5A8C;
+  --sidebar-bg:#1A3328;--sidebar-border:rgba(245,237,212,.08);
+  --sidebar-text:#E8DFC8;--sidebar-sub:rgba(245,237,212,.42);
+  --sidebar-section:rgba(245,237,212,.28);
+  --card-bg:#FEFAF2;--card-border:#D4C9B0;
+  --input-bg:#FEFAF2;--input-border:#C4B49A;
+  --header-bg:rgba(245,237,212,.96);--header-border:#C4B49A;
+  --toolbar-bg:rgba(245,237,212,.7);
+  --zone-bg:rgba(245,237,212,.5);
+  --annot-bg:#F5EDD4;
+  --shadow:rgba(0,0,0,.08);--shadow2:rgba(0,0,0,.15);
+  --hl-yellow:rgba(255,220,50,.45);--hl-yellow-h:rgba(255,220,50,.7);
+  --hl-green:rgba(45,106,79,.18);--hl-green-b:rgba(45,106,79,.5);
+  --code-bg:rgba(45,106,79,.1);--code-border:rgba(45,106,79,.25);
+  --err-bg:rgba(184,92,56,.07);--err-border:rgba(184,92,56,.25);
+  --badge-bg:rgba(184,92,56,.35);--badge-text:#8A4020;
+  --toast-bg:#1E3A2F;--toast-text:#F5EDD4;
+  --empty:#C4B49A;
+  --hist-bg:rgba(254,250,242,.5);
+  --scrollbar:#C4B49A;
+  --intro-overlay:rgba(245,237,212,.98);
+}
+
+/* ── DARK THEME ── */
+[data-theme="dark"]{
+  --bg:#0F1A14;--bg2:#152019;--bg3:#0A1209;
+  --border:#2A3D30;--border2:#1E2E25;
+  --text:#E8DFC8;--text2:#B8A98A;--text3:#7A8A78;--text4:#4A5A48;
+  --green-dark:#2D6A4F;--green-mid:#3D8A6A;--green-pale:#1E4030;
+  --amber:#D4784A;--purple:#9B7EC7;--blue:#4A7AAC;
+  --sidebar-bg:#0A1209;--sidebar-border:rgba(200,220,200,.06);
+  --sidebar-text:#C8DACC;--sidebar-sub:rgba(200,220,200,.35);
+  --sidebar-section:rgba(200,220,200,.22);
+  --card-bg:#152019;--card-border:#1E2E25;
+  --input-bg:#0F1A14;--input-border:#2A3D30;
+  --header-bg:rgba(10,18,9,.96);--header-border:#1E2E25;
+  --toolbar-bg:rgba(15,26,20,.9);
+  --zone-bg:rgba(10,18,9,.6);
+  --annot-bg:#0F1A14;
+  --shadow:rgba(0,0,0,.3);--shadow2:rgba(0,0,0,.5);
+  --hl-yellow:rgba(200,170,40,.3);--hl-yellow-h:rgba(200,170,40,.5);
+  --hl-green:rgba(45,106,79,.3);--hl-green-b:rgba(45,106,79,.7);
+  --code-bg:rgba(45,106,79,.15);--code-border:rgba(45,106,79,.35);
+  --err-bg:rgba(184,92,56,.12);--err-border:rgba(184,92,56,.35);
+  --badge-bg:rgba(212,120,74,.3);--badge-text:#E8C4A8;
+  --toast-bg:#2D6A4F;--toast-text:#F0EDE0;
+  --empty:#3A4A38;
+  --hist-bg:rgba(21,32,25,.6);
+  --scrollbar:#2A3D30;
+  --intro-overlay:rgba(10,18,9,.98);
+}
+
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--scrollbar);border-radius:4px}
+
+html,body{height:100%}
+body{
+  font-family:'Lora',serif;
+  background:var(--bg);
+  color:var(--text);
+  -webkit-text-size-adjust:100%;
+  transition:background .3s,color .3s;
+}
+em{font-family:'Cormorant Garamond',serif;font-style:italic;}
+button{font-family:inherit;cursor:pointer;}
+input,textarea,select{font-family:inherit;}
+
+/* ════════ INICIO (estética original) ════════ */
+.intro-box{
+  max-width:640px;width:100%;text-align:center;margin:auto;padding:1.5rem 0 1rem;
+  animation:introIn .6s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes introIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.intro-sigil{font-size:2.2rem;margin-bottom:.9rem;opacity:.7;animation:float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.intro-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,5vw,2.5rem);font-weight:300;color:var(--text);letter-spacing:.04em;margin-bottom:.25rem;line-height:1.15;}
+.intro-title em{color:var(--amber);font-style:italic;}
+.intro-subtitle{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:1.5rem;}
+.intro-divider{width:36px;height:1px;background:var(--border);margin:.7rem auto 1.1rem;}
+.intro-desc{font-family:'Lora',serif;font-size:clamp(.82rem,2.2vw,.92rem);line-height:1.8;color:var(--text2);margin-bottom:1.4rem;text-align:left;max-width:500px;margin-left:auto;margin-right:auto;}
+.intro-features{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:1.5rem;text-align:left;}
+@media(max-width:480px){.intro-features{grid-template-columns:1fr;gap:.4rem;}}
+.intro-feat{display:flex;align-items:flex-start;gap:.5rem;padding:.6rem .7rem;background:var(--card-bg);border:1px solid var(--border2);border-radius:6px;transition:border-color .15s,transform .15s,box-shadow .2s;cursor:pointer;text-align:left;width:100%;}
+.intro-feat:hover{border-color:var(--green-mid);transform:translateY(-2px);box-shadow:0 4px 12px var(--shadow);}
+.intro-feat-sym{font-size:.95rem;flex-shrink:0;margin-top:.05rem;}
+.intro-feat-text{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.05em;color:var(--text2);line-height:1.55;}
+.intro-feat-title{font-family:'Cormorant Garamond',serif;font-size:.86rem;font-weight:600;color:var(--text);display:block;margin-bottom:.08rem;}
+.intro-aitag{font-family:'IBM Plex Mono',monospace;font-size:.42rem;font-weight:400;letter-spacing:.1em;text-transform:uppercase;background:rgba(45,106,79,.18);color:#5A9A7A;padding:.05rem .28rem;border-radius:2px;margin-left:.3rem;vertical-align:middle;}
+.intro-note{font-family:'IBM Plex Mono',monospace;font-size:.5rem;letter-spacing:.08em;color:var(--text4);margin-top:.85rem;text-transform:uppercase;line-height:1.7;}
+
+/* ════════ APP SHELL ════════ */
+.app{display:flex;flex-direction:column;min-height:100vh;}
+.hdr{
+  position:sticky;top:0;z-index:80;
+  display:flex;align-items:center;justify-content:space-between;gap:.75rem;
+  padding:.6rem 1rem;background:var(--header-bg);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--header-border);
+}
+.hdr-left{display:flex;align-items:center;gap:.6rem;min-width:0;}
+.hdr-home-btn{
+  background:none;border:1px solid var(--border);color:var(--text2);
+  width:34px;height:34px;border-radius:8px;font-size:1rem;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:.15s;
+}
+.hdr-home-btn:hover{background:var(--bg3);color:var(--green-mid);border-color:var(--green-mid);}
+.hdr-titles{min-width:0;}
+.hdr-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-sub{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+.hdr-right{display:flex;align-items:center;gap:.5rem;flex-shrink:0;}
+.hdr-status{display:none;align-items:center;gap:.4rem;font-size:.7rem;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+@media(min-width:760px){.hdr-status{display:flex;}}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);}
+.save-pill{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.5px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--text3);white-space:nowrap;transition:.3s;}
+.save-pill.saving{color:var(--amber);border-color:var(--amber);}
+.save-pill.saved{color:var(--green-mid);border-color:var(--green-mid);}
+.save-pill.dirty{color:var(--text3);}
+.ai-toggle{display:flex;align-items:center;gap:.4rem;cursor:pointer;padding:4px 8px;border-radius:20px;border:1px solid var(--border);user-select:none;}
+.ai-toggle-label{font-family:'IBM Plex Mono',monospace;font-size:.65rem;letter-spacing:1px;color:var(--text2);}
+.ai-switch{width:30px;height:16px;border-radius:10px;background:var(--border);position:relative;transition:.2s;}
+.ai-switch::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:var(--bg2);top:2px;left:2px;transition:.2s;}
+.ai-switch.on{background:var(--green-mid);}
+.ai-switch.on::after{left:16px;}
+.theme-btn{background:none;border:1px solid var(--border);width:34px;height:34px;border-radius:8px;font-size:.95rem;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.theme-btn:hover{background:var(--bg3);}
+
+.layout{display:flex;flex:1;min-height:0;}
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--sidebar-bg);
+  padding:1rem .7rem;overflow-y:auto;position:sticky;top:53px;
+  height:calc(100vh - 53px);
+}
+.content{flex:1;min-width:0;display:flex;flex-direction:column;}
+.content-scroll{flex:1;overflow-y:auto;scroll-behavior:smooth;}
+
+/* sidebar items */
+.s-sec{font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--sidebar-section);margin:1rem .5rem .4rem;}
+.s-div{border:none;border-top:1px solid var(--sidebar-border);margin:.8rem .3rem;}
+.s-btn{
+  width:100%;display:flex;align-items:center;gap:.6rem;text-align:left;
+  background:none;border:none;padding:.55rem .6rem;border-radius:8px;color:var(--sidebar-text);
+  transition:background .15s;margin-bottom:1px;
+}
+.s-btn:hover{background:rgba(255,255,255,.05);}
+.s-btn.active{background:rgba(255,255,255,.1);}
+.s-btn.s-locked{opacity:.55;}
+.s-sym{font-size:1.05rem;flex-shrink:0;width:20px;text-align:center;}
+.s-texts{display:flex;flex-direction:column;min-width:0;flex:1;}
+.s-name{font-size:.86rem;font-weight:500;display:flex;align-items:center;gap:.35rem;}
+.s-sub{font-size:.66rem;color:var(--sidebar-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.s-aitag{font-family:'IBM Plex Mono',monospace;font-size:.52rem;background:rgba(45,106,79,.4);color:#A8D8BC;padding:0 4px;border-radius:3px;letter-spacing:.5px;}
+.s-badge{background:var(--green-mid);color:#fff;font-size:.62rem;font-family:'IBM Plex Mono',monospace;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;}
+.s-lock{color:var(--sidebar-sub);font-size:.9rem;}
+.s-footer{font-family:'IBM Plex Mono',monospace;font-size:.6rem;line-height:1.6;color:var(--sidebar-sub);text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid var(--sidebar-border);}
+.s-backup-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.6rem;padding:.7rem .6rem;border-radius:9px;border:1px solid rgba(245,237,212,.25);background:rgba(45,106,79,.28);color:var(--sidebar-text);font-weight:600;font-size:.82rem;transition:.15s;}
+.s-backup-btn:hover{background:var(--green-mid);border-color:var(--green-mid);transform:translateY(-1px);}
+.s-backup-sym{font-size:1rem;}
+
+/* mobile sidebar → bottom bar */
+@media(max-width:760px){
+  .layout{flex-direction:column;}
+  .sidebar{
+    position:fixed;bottom:0;left:0;right:0;top:auto;width:100%;height:auto;
+    display:flex;overflow-x:auto;overflow-y:hidden;padding:.4rem .5rem;gap:.3rem;
+    z-index:70;border-top:1px solid var(--sidebar-border);
+  }
+  .s-sec,.s-div,.s-footer{display:none;}
+  .s-backup-btn{width:auto;min-width:56px;flex-direction:column;gap:.1rem;margin-top:0;padding:.4rem .5rem;}
+  .s-backup-txt{font-size:.55rem;}
+  .s-btn{flex-direction:column;width:auto;min-width:62px;gap:.15rem;padding:.4rem .5rem;text-align:center;}
+  .s-sub{display:none;}
+  .s-name{font-size:.62rem;flex-direction:column;}
+  .s-badge{position:absolute;}
+  .content-scroll{padding-bottom:70px;}
+}
+
+/* ════════ COMMON UI ════════ */
+.wrap{max-width:1100px;margin:0 auto;padding:1.2rem 1.2rem 3rem;width:100%;}
+.breadcrumbs{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;font-size:.74rem;color:var(--text3);font-family:'IBM Plex Mono',monospace;padding:.7rem 1.2rem .2rem;max-width:1100px;margin:0 auto;width:100%;}
+.crumb{background:none;border:none;color:var(--text3);padding:0;font-size:.74rem;font-family:inherit;}
+.crumb.link{color:var(--green-mid);cursor:pointer;}
+.crumb.link:hover{text-decoration:underline;}
+.crumb-sep{color:var(--text4);}
+.crumb.current{color:var(--text2);}
+
+.page-head{margin-bottom:1.2rem;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;display:flex;align-items:center;gap:.5rem;}
+.page-sub{font-size:.86rem;color:var(--text2);margin-top:.25rem;line-height:1.5;max-width:680px;}
+
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.05rem;border-radius:7px;font-size:.84rem;font-weight:500;border:1px solid transparent;transition:.15s;}
+.btn.green{background:var(--green-dark);color:var(--sidebar-text);}
+.btn.green:hover{background:var(--green-mid);}
+.btn.outline{background:transparent;border-color:var(--border);color:var(--text2);}
+.btn.outline:hover{border-color:var(--green-mid);color:var(--green-mid);}
+.btn.amber{background:var(--amber);color:#fff;}
+.btn.danger{background:transparent;border-color:var(--amber);color:var(--amber);}
+.btn.danger:hover{background:var(--amber);color:#fff;}
+.btn.sm{padding:.35rem .7rem;font-size:.76rem;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+.tip{font-size:.76rem;color:var(--text3);font-style:italic;font-family:'Cormorant Garamond',serif;line-height:1.5;}
+.tooltip-hint{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--text4);color:var(--text3);font-size:.6rem;cursor:help;margin-left:.3rem;}
+
+.field-label{display:block;font-size:.74rem;font-weight:600;color:var(--text2);margin-bottom:.3rem;letter-spacing:.3px;}
+.field-in,.field-ta,.field-sel{
+  width:100%;background:var(--input-bg);border:1px solid var(--input-border);
+  border-radius:7px;padding:.6rem .7rem;font-size:.88rem;color:var(--text);transition:border .15s;
+}
+.field-ta{resize:vertical;min-height:80px;line-height:1.6;}
+.field-in:focus,.field-ta:focus,.field-sel:focus{outline:none;border-color:var(--green-mid);}
+.field-row{margin-bottom:.9rem;}
+.field-2col{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+@media(max-width:620px){.field-2col{grid-template-columns:1fr;}}
+
+.card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:1rem;box-shadow:0 1px 3px var(--shadow);}
+.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--empty);}
+.empty-sigil{font-size:2rem;opacity:.4;margin-bottom:.5rem;}
+.empty-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.95rem;color:var(--text2);line-height:1.5;}
+
+.toast{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--toast-bg);color:var(--toast-text);padding:.7rem 1.3rem;border-radius:8px;
+  font-size:.84rem;z-index:2000;box-shadow:0 6px 20px var(--shadow2);opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(max-width:760px){.toast{bottom:80px;}}
+
+/* ════════ HOME DASHBOARD ════════ */
+.home-hero{text-align:center;padding:1.5rem 0 1rem;}
+.home-sigil{font-size:2rem;color:var(--green-mid);}
+.home-title{font-family:'Cormorant Garamond',serif;font-size:2.1rem;font-weight:600;margin-top:.3rem;}
+.home-proj{font-size:.9rem;color:var(--text2);margin-top:.4rem;font-style:italic;font-family:'Cormorant Garamond',serif;}
+.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-top:1.6rem;}
+.home-card{
+  text-align:left;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;
+  padding:1.1rem;transition:transform .15s,box-shadow .2s,border-color .2s;display:flex;flex-direction:column;gap:.4rem;
+}
+.home-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px var(--shadow);border-color:var(--green-mid);}
+.home-card-sym{font-size:1.5rem;}
+.home-card-title{font-size:1rem;font-weight:600;display:flex;align-items:center;gap:.4rem;}
+.home-card-desc{font-size:.78rem;color:var(--text2);line-height:1.5;}
+.home-card-stat{font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--text3);margin-top:.3rem;}
+.home-section-label{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin:1.8rem 0 .2rem;}
+
+/* ════════ SPLIT-SCREEN MODULE ════════ */
+.split{display:flex;gap:0;height:calc(100vh - 53px);}
+.split-left{flex:1;min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--border);}
+.split-right{width:420px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg2);}
+@media(max-width:900px){
+  .split{flex-direction:column;height:auto;}
+  .split-left{border-right:none;border-bottom:1px solid var(--border);}
+  .split-right{width:100%;}
+}
+.split-toolbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.6rem .9rem;border-bottom:1px solid var(--border);background:var(--toolbar-bg);position:sticky;top:0;z-index:10;}
+.split-doc-name{font-weight:600;font-size:.86rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.split-body{flex:1;overflow-y:auto;padding:1.4rem 1.6rem;}
+.doc-text{font-size:1rem;line-height:1.9;color:var(--text);white-space:pre-wrap;word-wrap:break-word;font-family:'Lora',serif;text-align:justify;hyphens:auto;}
+.doc-text mark{background:var(--hl-yellow);border-radius:2px;padding:0 1px;cursor:pointer;transition:background .15s;}
+.doc-text mark:hover{background:var(--hl-yellow-h);}
+.doc-text mark.coded{background:var(--hl-green);border-bottom:2px solid var(--hl-green-b);}
+.doc-text mark.coded:hover{background:var(--hl-green-b);}
+.doc-text mark.ai-suggest{background:transparent;border-bottom:2px dotted var(--purple);}
+.doc-text mark.flash{animation:flashmark 1.6s ease;}
+@keyframes flashmark{0%,40%{background:var(--amber);}100%{background:var(--hl-green);}}
+
+/* contextual menu on text selection */
+.ctx-menu{position:fixed;z-index:500;background:var(--card-bg);border:1px solid var(--border);border-radius:9px;box-shadow:0 8px 24px var(--shadow2);padding:.3rem;display:none;flex-direction:column;min-width:210px;}
+.ctx-menu.show{display:flex;}
+.ctx-item{display:flex;align-items:center;gap:.5rem;background:none;border:none;text-align:left;padding:.5rem .6rem;border-radius:6px;font-size:.8rem;color:var(--text);}
+.ctx-item:hover{background:var(--bg3);}
+.ctx-item .ci-sym{color:var(--green-mid);font-size:.9rem;width:16px;}
+
+/* right panel tabs */
+.tool-tabs{display:flex;flex-wrap:wrap;gap:.3rem;padding:.6rem .7rem;border-bottom:1px solid var(--border);background:var(--toolbar-bg);position:sticky;top:0;z-index:5;}
+.tool-tab{font-size:.72rem;padding:.35rem .6rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);transition:.15s;line-height:1.3;}
+.tool-tab:hover{border-color:var(--green-mid);}
+.tool-tab.active{background:var(--green-dark);color:var(--sidebar-text);border-color:var(--green-dark);}
+.tool-panel{flex:1;overflow-y:auto;padding:1rem;}
+.panel-sec-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--green-mid);margin-bottom:.3rem;}
+.panel-sec-desc{font-size:.76rem;color:var(--text3);margin-bottom:.7rem;line-height:1.5;}
+
+.usercode-chip{display:inline-flex;align-items:center;gap:.3rem;background:var(--code-bg);border:1px solid var(--code-border);color:var(--green-mid);padding:.2rem .55rem;border-radius:14px;font-size:.74rem;margin:.15rem;}
+.usercode-chip button{background:none;border:none;color:var(--text3);font-size:.8rem;padding:0;line-height:1;}
+.codelist{display:flex;flex-wrap:wrap;gap:.2rem;margin:.5rem 0;}
+.codelist-item{display:inline-flex;align-items:center;gap:.3rem;background:var(--bg3);border:1px solid var(--border);padding:.2rem .55rem;border-radius:14px;font-size:.74rem;color:var(--text2);}
+.codelist-item:hover{border-color:var(--green-mid);color:var(--green-mid);}
+.hscroll{display:flex;gap:.35rem;overflow-x:auto;padding-bottom:.4rem;}
+.hscroll>*{flex-shrink:0;white-space:nowrap;}
+.enfoque-box{margin:.6rem 0;border:1px solid var(--border);border-radius:8px;background:var(--bg3);}
+.enfoque-box>summary{cursor:pointer;padding:.5rem .7rem;font-size:.78rem;color:var(--text2);list-style:none;}
+.enfoque-box>summary::-webkit-details-marker{display:none;}
+.enfoque-box[open]>summary{border-bottom:1px solid var(--border);}
+.enfoque-opts{display:flex;flex-wrap:wrap;gap:.3rem;padding:.6rem .7rem;}
+.enf-opt{font-size:.72rem;padding:.3rem .6rem;border-radius:14px;border:1px solid var(--border);background:transparent;color:var(--text2);}
+.enf-opt.active{background:rgba(123,94,167,.15);border-color:var(--purple);color:var(--purple);}
+
+.ai-box{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:.8rem;margin-top:.8rem;}
+.ai-box-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;}
+.ai-box-label{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--purple);}
+.ai-out{font-size:.86rem;line-height:1.7;max-height:none;overflow:visible;word-wrap:break-word;}
+.ai-out .md-sec{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:1px;text-transform:uppercase;color:var(--green-mid);margin:.9em 0 .3em;font-weight:600;}
+.ai-out .md-bul{display:flex;gap:.4rem;margin:.2em 0;}
+.ai-out .md-dot{color:var(--green-mid);}
+.ai-out code{font-family:'IBM Plex Mono',monospace;}
+.ai-sugg-code{display:inline-flex;align-items:center;gap:.3rem;background:rgba(123,94,167,.12);border:1px solid rgba(123,94,167,.3);color:var(--purple);padding:.2rem .55rem;border-radius:14px;font-size:.74rem;margin:.15rem;}
+.ai-sugg-code button{background:none;border:none;color:var(--purple);font-size:.85rem;padding:0;font-weight:700;}
+
+.dots{display:inline-flex;gap:3px;}
+.dots .dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:bd 1s infinite;}
+.dots .dot:nth-child(2){animation-delay:.2s;}
+.dots .dot:nth-child(3){animation-delay:.4s;}
+@keyframes bd{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.cursor-blink{display:inline-block;width:7px;height:1em;background:var(--green-mid);animation:bl 1s infinite;vertical-align:text-bottom;}
+@keyframes bl{50%{opacity:0}}
+
+/* ════════ NUBE / CONCEPT MAP ════════ */
+.nube-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+.nube-tab{font-size:.78rem;padding:.4rem .8rem;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text2);}
+.nube-tab.active{background:var(--green-dark);color:var(--sidebar-text);border-color:var(--green-dark);}
+.concept-map{display:flex;flex-wrap:wrap;gap:.8rem;align-items:flex-start;}
+.concept-node{
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:.7rem 1rem;
+  display:flex;flex-direction:column;gap:.3rem;transition:transform .15s,box-shadow .2s,border-color .2s;cursor:pointer;
+  border-left:4px solid var(--green-mid);
+}
+.concept-node:hover{transform:translateY(-3px);box-shadow:0 8px 18px var(--shadow);border-color:var(--green-mid);}
+.concept-node-name{font-weight:600;font-size:.96rem;}
+.concept-node-meta{font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--text3);display:flex;gap:.7rem;flex-wrap:wrap;}
+.concept-node-freq{display:inline-flex;align-items:center;justify-content:center;background:var(--green-mid);color:#fff;border-radius:12px;min-width:22px;height:22px;padding:0 7px;font-size:.72rem;}
+.concept-node-origins{font-size:.72rem;color:var(--text2);line-height:1.4;}
+.code-row{background:var(--card-bg);border:1px solid var(--card-border);border-radius:9px;margin-bottom:.5rem;overflow:hidden;}
+.code-row-head{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;cursor:pointer;}
+.code-row-head:hover{background:var(--bg3);}
+.code-row-name{font-weight:600;font-size:.92rem;flex:1;}
+.code-row-caret{color:var(--text3);}
+.code-row-body{padding:.3rem .6rem .7rem;display:flex;flex-direction:column;gap:.3rem;}
+.gotomat{text-align:left;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:.45rem .6rem;font-size:.8rem;color:var(--text);}
+.gotomat:hover{border-color:var(--green-mid);color:var(--green-mid);}
+
+.code-detail-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem;}
+.code-detail-name{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:600;}
+.frag-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:.9rem 1rem;margin-bottom:.8rem;cursor:pointer;transition:.15s;border-left:3px solid var(--green-mid);}
+.frag-card:hover{border-color:var(--green-mid);box-shadow:0 3px 10px var(--shadow);}
+.frag-src{font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;display:flex;align-items:center;gap:.4rem;}
+.frag-text{font-size:.9rem;line-height:1.65;color:var(--text);}
+.frag-text .hl{background:var(--hl-yellow);border-radius:2px;padding:0 2px;}
+.frag-note{font-size:.78rem;color:var(--text2);margin-top:.4rem;font-style:italic;border-top:1px dashed var(--border);padding-top:.4rem;}
+
+/* ════════ MATERIALS / BIBLIO ════════ */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:1.6rem 1rem;text-align:center;transition:.15s;background:var(--zone-bg);cursor:pointer;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green-mid);background:var(--code-bg);}
+.upload-sym{font-size:1.6rem;color:var(--text3);margin-bottom:.4rem;}
+.upload-text{font-size:.86rem;color:var(--text2);}
+.upload-hint{font-size:.72rem;color:var(--text3);margin-top:.3rem;}
+.mat-list{display:flex;flex-direction:column;gap:.6rem;margin-top:1.2rem;}
+.mat-item{display:flex;align-items:center;gap:.7rem;background:var(--card-bg);border:1px solid var(--card-border);border-radius:9px;padding:.7rem .9rem;transition:.15s;}
+.mat-item:hover{border-color:var(--green-mid);}
+.mat-sym{font-size:1.1rem;flex-shrink:0;}
+.mat-info{flex:1;min-width:0;}
+.mat-name{font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mat-meta{font-family:'IBM Plex Mono',monospace;font-size:.64rem;color:var(--text3);}
+.mat-actions{display:flex;gap:.3rem;flex-shrink:0;}
+.icon-btn{background:none;border:1px solid var(--border);width:30px;height:30px;border-radius:7px;font-size:.85rem;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:.15s;}
+.icon-btn:hover{border-color:var(--green-mid);color:var(--green-mid);}
+.icon-btn.danger:hover{border-color:var(--amber);color:var(--amber);}
+
+.folder-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:1rem 0;}
+.folder-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:.78rem;}
+.folder-chip.active{background:var(--purple);color:#fff;border-color:var(--purple);}
+.folder-chip .fc-count{font-size:.66rem;opacity:.8;}
+
+.link-mat-row{display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;border-radius:6px;font-size:.8rem;}
+.link-mat-row:hover{background:var(--bg3);}
+.link-mat-row input{accent-color:var(--green-mid);}
+
+.audio-rec{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:.6rem 0;}
+.rec-dot{width:10px;height:10px;border-radius:50%;background:var(--amber);animation:bl 1s infinite;}
+
+/* ════════ MODAL ════════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:900;display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:640px;width:100%;box-shadow:0 12px 40px var(--shadow2);margin:auto;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.3rem;border-bottom:1px solid var(--border);}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;}
+.modal-close{background:none;border:none;font-size:1.2rem;color:var(--text3);width:32px;height:32px;border-radius:8px;}
+.modal-close:hover{background:var(--bg3);color:var(--text);}
+.modal-body{padding:1.3rem;max-height:70vh;overflow-y:auto;}
+.modal-foot{display:flex;gap:.6rem;justify-content:flex-end;padding:1rem 1.3rem;border-top:1px solid var(--border);flex-wrap:wrap;}
+
+.err-detail{background:var(--err-bg);border:1px solid var(--err-border);border-radius:9px;padding:.8rem 1rem;margin-bottom:1rem;}
+.err-detail-title{font-weight:600;color:var(--amber);margin-bottom:.3rem;font-size:.9rem;}
+.err-detail-body{font-size:.82rem;color:var(--text2);line-height:1.6;}
+.warn-box{background:rgba(184,92,56,.08);border:1px solid var(--err-border);border-radius:8px;padding:.6rem .8rem;font-size:.78rem;color:var(--text2);line-height:1.55;margin:.6rem 0;}
+.warn-box strong{color:var(--amber);}
+
+.md-sec{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--green-mid);margin:1em 0 .35em;font-weight:600;}
+.md-bul{display:flex;gap:.45rem;margin:.25em 0;line-height:1.6;}
+.md-dot{color:var(--green-mid);flex-shrink:0;}
+.cita-out{background:var(--card-bg);border:1px solid var(--card-border);border-radius:9px;padding:1rem;font-size:.86rem;line-height:1.7;}
+.cita-block{margin-bottom:1rem;}
+.cita-block:last-child{margin-bottom:0;}
+</style>
+</head>
+<body>
+
+<!-- ════════ APP ════════ -->
+<div class="app" id="app">
+  <header class="hdr">
+    <div class="hdr-left">
+      <button class="hdr-home-btn" id="home-btn" title="Volver al inicio">⌂</button>
+      <div class="hdr-titles">
+        <div class="hdr-title">FARO</div>
+        <div class="hdr-sub">Fichero analítico de registro y observación</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-status"><span class="status-dot" id="status-dot"></span><span id="status-label">…</span></div>
+      <span class="save-pill" id="save-pill">Guardado</span>
+      <div class="ai-toggle" id="ai-toggle" title="Activar o desactivar la IA"><span class="ai-toggle-label">IA</span><span class="ai-switch" id="ai-switch"></span></div>
+      <button class="theme-btn" id="theme-btn" title="Cambiar tema">☀</button>
+    </div>
+  </header>
+
+  <div class="toast" id="toast"></div>
+  <div class="ctx-menu" id="ctx-menu"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="content">
+      <div id="breadcrumbs"></div>
+      <div class="content-scroll" id="content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- generic modal -->
+<div class="modal-overlay" id="modal"><div class="modal-box" id="modal-box"></div></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIG — Gemini (gratis, sin tarjeta)
+// ═══════════════════════════════════════════════════════════════════════════
+const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const DEFAULT_MODEL = "gemini-2.5-flash";
+const MODEL_OPTIONS = [
+  { id:"gemini-2.5-flash",      label:"Flash 2.5",      desc:"Equilibrado · 250 consultas/día gratis · recomendado" },
+  { id:"gemini-2.5-flash-lite", label:"Flash-Lite 2.5", desc:"Más rápido · 1.000 consultas/día gratis" },
+  { id:"gemini-2.5-pro",        label:"Pro 2.5",        desc:"Más profundo · 100 consultas/día gratis · sin búsqueda web gratis" },
+];
+
+// Secciones fijas de cada modo de trabajo (panel derecho, como pestañas).
+const CODIFICAR_SECTIONS = [
+  { key:"resuenan",   title:"Palabras que resuenan",      desc:"Términos del propio material con carga significativa." },
+  { key:"entradas",   title:"Posibles entradas analíticas",desc:"Conceptos o categorías que podrían organizar el análisis." },
+  { key:"borde",      title:"Lo que queda en el borde",   desc:"Lo marginal, lo que no encaja fácil, lo que el código no captura." },
+  { key:"preguntas",  title:"Preguntas para volver al campo",desc:"Interrogantes para la próxima instancia de trabajo de campo." },
+  { key:"conexion",   title:"Una conexión posible",       desc:"Vínculo con literatura teórica o empírica relevante." },
+];
+const ANALIZAR_SECTIONS = [
+  { key:"pasando",    title:"¿Qué está pasando?",         desc:"Descripción de lo que ocurre en el material." },
+  { key:"tensiones",  title:"Tensiones que abre",         desc:"Contradicciones, dilemas, fricciones internas." },
+  { key:"escalas",    title:"Escalas en juego",           desc:"Micro/macro, individual/colectivo, local/global." },
+  { key:"abiertas",   title:"Preguntas que deja abiertas",desc:"Interrogantes que el fragmento genera o no resuelve." },
+  { key:"hilo",       title:"Si tuviera que apostar a un hilo",desc:"Hipótesis interpretativa provisional." },
+  { key:"densa",      title:"Ayuda para descripción densa",desc:"Variantes de escritura más densas y situadas, sin reemplazar tu texto." },
+];
+
+const MATERIAL_TYPES = {
+  "notas-campo":{sym:"✎",col:"#2A5A8C",name:"Notas de campo",sub:"Registro de campo",audio:true},
+  "entrevistas":{sym:"❝",col:"#B85C38",name:"Entrevistas",sub:"Transcripciones",audio:true},
+  "documentos":{sym:"◧",col:"#7B5EA7",name:"Bibliografía",sub:"Repositorio de materiales",audio:false},
+};
+const WORK_TYPES = ["notas-campo","entrevistas","documentos"]; // sobre qué se codifica/analiza
+
+// Menú lateral
+const SIDEBAR_GROUPS = [
+  {section:"", items:[ {key:"home",sym:"⌂",col:"#2D6A4F",name:"Inicio",sub:"Panel general"} ]},
+  {section:"Proyecto", items:[
+    {key:"proyecto",sym:"◈",col:"#2D6A4F",name:"Mi proyecto",sub:"Memoria de la investigación"},
+  ]},
+  {section:"Materiales", items:[
+    {key:"notas-campo",sym:"✎",col:"#2A5A8C",name:"Notas de campo",sub:"Cargar y leer",badge:"notas-campo"},
+    {key:"entrevistas",sym:"❝",col:"#B85C38",name:"Entrevistas",sub:"Transcripciones",badge:"entrevistas"},
+    {key:"documentos",sym:"◧",col:"#7B5EA7",name:"Bibliografía",sub:"Repositorio",badge:"documentos"},
+  ]},
+  {section:"Herramientas", items:[
+    {key:"codificar",sym:"◈",col:"#2D6A4F",name:"Codificar",sub:"Códigos analíticos",ai:true},
+    {key:"analizar",sym:"◉",col:"#1E3A2F",name:"Analizar",sub:"Descripción densa",ai:true},
+    {key:"profundidad",sym:"❖",col:"#2A5A8C",name:"Trabajo en profundidad",sub:"Exploración integrada"},
+    {key:"nube",sym:"◆",col:"#7B5EA7",name:"Nube",sub:"Códigos, análisis y recom.",badge:"saved"},
+    {key:"citar",sym:"◎",col:"#B85C38",name:"Citar",sub:"Referencias"},
+    {key:"recomendar",sym:"◌",col:"#7B5EA7",name:"Recomendar biblio.",sub:"Bibliografía sugerida",ai:true},
+  ]},
+  {section:"", items:[ {key:"config",sym:"⚙",col:"#5C5040",name:"Configuración",sub:"IA, datos, ayuda"} ]},
+];
+const AI_KEYS = ["codificar","analizar","recomendar"];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let route = "home";        // home | proyecto | notas-campo | entrevistas | documentos | codificar | analizar | nube | citar | recomendar | config | code-detail
+let routeParam = null;     // p.ej. matId activo, codeId, etc.
+let darkMode = false;
+let aiOn = true;
+let loaded = false;
+
+let project = {tema:"",objetivoGeneral:"",objetivosEspecificos:"",enfoque:"",campo:"",poblacion:"",estadoArte:"",metodologia:""};
+let materials = [];        // {id,type,name,text,folder,date,mime,anns:[]}
+let folders = [];          // {id,name}  (bibliografía)
+let savedCodes = [];       // {id,code,date}  vocabulario de códigos
+let savedAnalyses = [];    // {id,title,body,matId,quote,codes:[],date,mode,section}
+let recomendaciones = [];  // {id,kind:'pregunta'|'recomendacion'|'sugerencia',title,body,matId,matName,quote,source:'usuario'|'ia',date}
+let deepNotes = [];        // {id,title,body,matIds:[],date}  notas de Trabajo en profundidad
+let cats = {};             // categorías emergentes {nombre:frecuencia}
+let history = [];          // historial de IA por sesión
+
+// estado de trabajo (split-screen)
+let activeMatId = null;
+let workTab = null;        // pestaña activa del panel derecho (codificar: codigos|preguntas ; analizar: escribir|biblio|fuentes)
+let workEnfoque = "";      // eje/dimensión seleccionado para guiar a la IA ("" = general)
+let workAiOut = "";        // salida IA en curso
+let workAiSections = {};   // salida IA parseada por sección
+let workAiLoading = false;
+let workLinkedMats = [];   // ids de materiales vinculados como insumo IA
+let pendingSel = null;     // {quote,start,end} selección pendiente
+let nubeTab = "codigos";
+let nubeOpenCode = null;
+let recOut = ""; let recInput = ""; let recLoading = false; let recErr = null; let recGrounding = true;
+let citarGrounding = false;
+let deepSelected = [];     // ids de materiales elegidos en Trabajo en profundidad
+let citarState = {tipo:"libro",autores:"",anio:"",titulo:"",subtitulo:"",editorial:"",lugar:"",edicion:"",revista:"",volumen:"",numero:"",paginas:"",doi:"",url:"",sitio:"",fechaAcceso:"",capLibro:"",capEditores:"",universidad:"",nivelTesis:"doctoral"};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STORAGE — IndexedDB (kv para estado, files para blobs grandes)
+// ═══════════════════════════════════════════════════════════════════════════
+const DB_NAME = "cuaderno-etno";
+const DB_VER = 1;
+let _db = null;
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains("kv")) db.createObjectStore("kv");
+      if(!db.objectStoreNames.contains("files")) db.createObjectStore("files");
+    };
+    req.onsuccess = ()=>{ _db = req.result; resolve(_db); };
+    req.onerror = ()=>reject(req.error);
+  });
+}
+function idbGet(store,key){
+  return new Promise((resolve,reject)=>{
+    const tx=_db.transaction(store,"readonly").objectStore(store).get(key);
+    tx.onsuccess=()=>resolve(tx.result); tx.onerror=()=>reject(tx.error);
+  });
+}
+function idbSet(store,key,val){
+  return new Promise((resolve,reject)=>{
+    const tx=_db.transaction(store,"readwrite").objectStore(store).put(val,key);
+    tx.onsuccess=()=>resolve(true); tx.onerror=()=>reject(tx.error);
+  });
+}
+function idbDel(store,key){
+  return new Promise((resolve,reject)=>{
+    const tx=_db.transaction(store,"readwrite").objectStore(store).delete(key);
+    tx.onsuccess=()=>resolve(true); tx.onerror=()=>reject(tx.error);
+  });
+}
+
+// Claves de estado en kv
+const KV = ["project","materials","folders","savedCodes","savedAnalyses","cats","aiOn","theme","apiKey","model","introSeen","history"];
+
+async function loadState(){
+  await openDB();
+  // Migración desde localStorage (versión vieja) si IDB está vacío.
+  const migrated = await idbGet("kv","_migrated");
+  let migratedNow=false;
+  if(!migrated){ await migrateFromLocalStorage(); migratedNow=true; }
+
+  const g = async (k)=> await idbGet("kv",k);
+  const p = await g("project"); if(p) project = {...project, ...p};
+  // unificar campo viejo dentro de población (una sola vez)
+  if(project.campo && project.campo.trim()){ project.poblacion=[project.campo,project.poblacion].filter(x=>x&&x.trim()).join(" · "); project.campo=""; }
+  const m = await g("materials"); if(Array.isArray(m)) materials = m;
+  const f = await g("folders"); if(Array.isArray(f)) folders = f;
+  const sc = await g("savedCodes"); if(Array.isArray(sc)) savedCodes = sc;
+  const sa = await g("savedAnalyses"); if(Array.isArray(sa)) savedAnalyses = sa;
+  const rc = await g("recomendaciones"); if(Array.isArray(rc)) recomendaciones = rc;
+  const dn = await g("deepNotes"); if(Array.isArray(dn)) deepNotes = dn;
+  const ct = await g("cats"); if(ct) cats = ct;
+  const h = await g("history"); if(Array.isArray(h)) history = h;
+  const ai = await g("aiOn"); aiOn = (ai===undefined||ai===null) ? true : ai;
+  const th = await g("theme"); darkMode = (th===undefined||th===null) ? false : th; // req 17: predeterminado claro
+  return migratedNow;
+}
+
+async function migrateFromLocalStorage(){
+  try{
+    const L = (k)=>{ try{const r=localStorage.getItem(k); return r?JSON.parse(r):null;}catch{return null;} };
+    const oldProj = L("etno-project");
+    if(oldProj){
+      // mapear campos viejos → nuevos (req 7)
+      project.tema = oldProj.tema || "";
+      project.objetivoGeneral = oldProj.objetivos || "";
+      project.enfoque = oldProj.enfoque || "";
+      project.campo = oldProj.campo || "";
+      // 'preguntas' viejo se descarta como campo (req 7), pero lo preservamos en estado del arte por las dudas
+      if(oldProj.preguntas) project.estadoArte = "";
+    }
+    const oldMats = L("etno-materials");
+    if(Array.isArray(oldMats)) materials = oldMats.map(m=>({...m, folder:m.folder||null, anns:m.anns||[]}));
+    const oldDocs = L("etno-docs");
+    if((!oldMats||oldMats.length===0) && Array.isArray(oldDocs)){
+      materials = oldDocs.map(d=>({id:d.id,type:"documentos",name:d.name,text:d.text,folder:null,date:new Date().toLocaleDateString("es-AR"),anns:[]}));
+    }
+    const oldNotes = L("etno-notes");
+    if(Array.isArray(oldNotes)) oldNotes.forEach(n=>{ if(n.text) materials.push({id:n.id||("mat_"+Math.random().toString(36).slice(2)),type:"notas-campo",name:n.title||"Nota",text:n.text,folder:null,date:new Date().toLocaleDateString("es-AR"),anns:[]}); });
+    const oldCats = L("etno-cats"); if(oldCats) cats = oldCats;
+    const oldCodes = L("etno-saved-codes"); if(Array.isArray(oldCodes)) savedCodes = oldCodes.map(c=>({id:c.id,code:c.code,date:c.date||""}));
+    const oldAna = L("etno-saved-analyses"); if(Array.isArray(oldAna)) savedAnalyses = oldAna;
+    const oldKey = L("etno-api-key"); if(oldKey) await idbSet("kv","apiKey",oldKey);
+    const oldModel = L("etno-model"); if(oldModel) await idbSet("kv","model",oldModel);
+    // persistir lo migrado
+    await idbSet("kv","project",project);
+    await idbSet("kv","materials",materials);
+    await idbSet("kv","savedCodes",savedCodes);
+    await idbSet("kv","savedAnalyses",savedAnalyses);
+    await idbSet("kv","cats",cats);
+  }catch(e){ /* migración best-effort */ }
+  await idbSet("kv","_migrated",true);
+}
+
+// ── Autoguardado (req 8) ──
+let _saveTimer=null, _saveState="saved";
+function markDirty(){ setSavePill("dirty"); scheduleSave(); }
+function scheduleSave(){
+  if(_saveTimer) clearTimeout(_saveTimer);
+  setSavePill("saving");
+  _saveTimer=setTimeout(()=>{ persist(true); }, 800);
+}
+async function persist(silent){
+  try{
+    await idbSet("kv","project",project);
+    await idbSet("kv","materials",materials);
+    await idbSet("kv","folders",folders);
+    await idbSet("kv","savedCodes",savedCodes);
+    await idbSet("kv","savedAnalyses",savedAnalyses);
+    await idbSet("kv","recomendaciones",recomendaciones);
+    await idbSet("kv","deepNotes",deepNotes);
+    await idbSet("kv","cats",cats);
+    await idbSet("kv","history",history.slice(0,12));
+    setSavePill("saved");
+  }catch(e){ setSavePill("dirty"); }
+}
+function setSavePill(s){
+  _saveState=s;
+  const el=document.getElementById("save-pill"); if(!el) return;
+  el.className="save-pill "+s;
+  el.textContent = s==="saving"?"Guardando…": s==="dirty"?"Sin guardar":"Guardado";
+}
+
+// API key / model helpers (en IDB)
+let _apiKey="", _model=DEFAULT_MODEL;
+async function loadCreds(){ _apiKey = (await idbGet("kv","apiKey"))||""; _model=(await idbGet("kv","model"))||DEFAULT_MODEL; }
+function hasKey(){ return !!_apiKey; }
+function getKey(){ return _apiKey; }
+function getModel(){ return _model; }
+async function setKey(k){ _apiKey=k||""; if(k) await idbSet("kv","apiKey",k); else await idbDel("kv","apiKey"); }
+async function setModel(m){ _model=m; await idbSet("kv","model",m); }
+function aiEnabled(){ return hasKey() && aiOn; }
+async function setAiOn(v){ aiOn=v; await idbSet("kv","aiOn",v); }
+async function setTheme(v){ darkMode=v; await idbSet("kv","theme",v); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTEXTO ACUMULATIVO PARA LA IA (req 11, 13, 15)
+// ═══════════════════════════════════════════════════════════════════════════
+const NO_FILLER = "No uses frases de relleno entusiastas ni evaluativas (nada de «¡Qué fragmento tan rico!», «¡Excelente pregunta!», «Genial», etc.). Empezá directo. Tono analítico, preciso y útil, de colega que piensa con quien investiga, nunca autoritativo ni de enciclopedia.";
+
+function projectFilled(){ return Object.values(project).some(v=>v && v.trim()); }
+function projectContext(){
+  if(!projectFilled()) return "";
+  const p=project; let c="\n\n— MARCO DEL PROYECTO (operá siempre dentro de este marco) —\n";
+  if(p.tema) c+=`Tema: ${p.tema}\n`;
+  if(p.objetivoGeneral) c+=`Objetivo central: ${p.objetivoGeneral}\n`;
+  if(p.objetivosEspecificos) c+=`Objetivos específicos: ${p.objetivosEspecificos}\n`;
+  if(p.enfoque) c+=`Enfoque teórico: ${p.enfoque}\n`;
+  const pob=[p.campo,p.poblacion].filter(x=>x&&x.trim()).join(" · ");
+  if(pob) c+=`Población (sujetos, espacios, etc.): ${pob}\n`;
+  if(p.estadoArte) c+=`Estado del arte: ${p.estadoArte}\n`;
+  if(p.metodologia) c+=`Metodología: ${p.metodologia}\n`;
+  c+="No impongas tu lectura: ofrecé aperturas dentro de este marco.\n—";
+  return c;
+}
+// Memoria acumulada: códigos, análisis y recomendaciones ya existentes (la "nube" como insumo de la IA).
+function priorWorkContext(){
+  let c="";
+  if(savedCodes.length){
+    c+="\n\n— CÓDIGOS YA CREADOS EN EL PROYECTO (no los repitas; construí sobre ellos, proponé códigos nuevos o vinculaciones con estos) —\n";
+    c+=savedCodes.map(x=>"· "+x.code).join("\n");
+  }
+  if(savedAnalyses.length){
+    c+="\n\n— ANÁLISIS YA TRABAJADOS (no repitas estas líneas; avanzá sobre lo ya pensado) —\n";
+    c+=savedAnalyses.slice(-8).map(a=>"· "+a.title+(a.body?": "+a.body.slice(0,160):"")).join("\n");
+  }
+  if(recomendaciones.length){
+    c+="\n\n— RECOMENDACIONES / PREGUNTAS GUARDADAS (insumo para seguir pensando; retomalas si son pertinentes) —\n";
+    c+=recomendaciones.slice(-10).map(r=>"· ["+r.kind+"] "+(r.title||"")+(r.body?": "+r.body.slice(0,140):"")).join("\n");
+  }
+  c+=deepWorkContext();
+  return c;
+}
+// Materiales vinculados como insumo (req 3, on-demand para economizar tokens).
+function linkedMaterialsContext(){
+  if(!workLinkedMats.length) return "";
+  let c="\n\n— MATERIALES BIBLIOGRÁFICOS VINCULADOS (usalos como insumo; citá de dónde sale cada idea) —\n";
+  for(const id of workLinkedMats){
+    const m=materials.find(x=>x.id===id); if(!m) continue;
+    c+=`\n[${m.name}]\n${(m.text||"").slice(0,3500)}\n`;
+  }
+  return c;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MOTOR GEMINI (reutilizado, con créditos async)
+// ═══════════════════════════════════════════════════════════════════════════
+function diagnoseGeminiError(status, errorBody){
+  const msg=(errorBody?.error?.message||"").toLowerCase();
+  const code=errorBody?.error?.code||status;
+  const errStatus=(errorBody?.error?.status||"").toUpperCase();
+  if(!hasKey()) return {title:"⚠ Aún no configuraste tu clave de Gemini",detail:"Las funciones con IA están desactivadas. Andá a Configuración para activarlas: es gratis y toma 5 minutos.",action:"config"};
+  if(status===0||status===undefined) return {title:"⚠ Sin conexión",detail:"No se pudo contactar con Google. Verificá tu conexión a internet y probá de nuevo.",action:"retry"};
+  if(code===400 && msg.includes("api key not valid")) return {title:"⚠ La clave no es válida",detail:"Google no reconoce esa clave. Suele empezar con 'AIza' (~39 caracteres). Volvé a Configuración y pegала de nuevo.",action:"config"};
+  if(code===400) return {title:"⚠ Solicitud incorrecta",detail:"Google rechazó la solicitud. Si era un archivo muy grande, probá uno más chico. Detalle: "+(errorBody?.error?.message||"—"),action:"retry"};
+  if(code===401||code===403){
+    if(msg.includes("region")||msg.includes("country")||msg.includes("location")) return {title:"⚠ Bloqueo geográfico",detail:"Google bloqueó la solicitud por la ubicación. Si tenés VPN activa, desactivala.",action:"config"};
+    return {title:"⚠ Permiso denegado",detail:"Revisá que tu clave sea correcta y que aceptaste los términos en aistudio.google.com con la misma cuenta.",action:"config"};
+  }
+  if(code===429) return {title:"⚠ Llegaste al tope de consultas",detail:"Excediste el límite gratuito de Gemini para este modelo. Esperá un minuto. Si pasa seguido, cambiá a 'Flash-Lite' en Configuración (1.000/día).",action:"config"};
+  if(code===413||msg.includes("too large")||msg.includes("size")) return {title:"⚠ Archivo demasiado grande",detail:"El contenido supera el límite de la API. Probá un archivo más liviano o partilo.",action:"retry"};
+  if(code>=500) return {title:"⚠ Error del servidor de Google",detail:"Problema en los servidores de Google. Esperá unos minutos.",action:"retry"};
+  return {title:"⚠ Error inesperado",detail:"Detalle: "+JSON.stringify(errorBody?.error||{status}),action:"retry"};
+}
+function buildGeminiBody(system,userContent,options={}){
+  const userParts=(typeof userContent==="string")?[{text:userContent}]:userContent;
+  const body={
+    systemInstruction:{parts:[{text:system}]},
+    contents:[{role:"user",parts:userParts}],
+    generationConfig:{maxOutputTokens:options.maxTokens||4000,temperature:options.temperature??0.8,topP:0.95},
+    safetySettings:[
+      {category:"HARM_CATEGORY_HARASSMENT",threshold:"BLOCK_ONLY_HIGH"},
+      {category:"HARM_CATEGORY_HATE_SPEECH",threshold:"BLOCK_ONLY_HIGH"},
+      {category:"HARM_CATEGORY_SEXUALLY_EXPLICIT",threshold:"BLOCK_ONLY_HIGH"},
+      {category:"HARM_CATEGORY_DANGEROUS_CONTENT",threshold:"BLOCK_ONLY_HIGH"}
+    ]
+  };
+  // Grounding con Google Search (gratis hasta 500/día en modelos 2.5, sin tarjeta).
+  if(options.grounding) body.tools=[{google_search:{}}];
+  return body;
+}
+// Solo los modelos 2.5 tienen grounding gratis en el nivel sin facturación.
+function groundingAvailable(){ return /2\.5/.test(getModel()); }
+function isProModel(){ return /pro/i.test(getModel()); }
+// Aviso cuando se usa Pro: la búsqueda web no es gratis en el plan gratuito de Pro.
+function proGroundingWarning(){
+  return isProModel() ? `<div class="warn-box" style="margin-top:.4rem">⚠ Estás en <strong>Pro 2.5</strong>: la búsqueda web no está incluida en el plan gratuito de Pro, así que puede dar error (o tener costo si tenés facturación activada). Para búsqueda web gratis, elegí <strong>Flash 2.5</strong> o <strong>Flash-Lite 2.5</strong> en Configuración.</div>` : "";
+}
+// Extrae las fuentes (enlaces) que devuelve el grounding.
+function extractSources(meta){
+  if(!meta) return [];
+  const chunks=meta.groundingChunks||[];
+  const out=[];
+  chunks.forEach(ch=>{ const w=ch.web||ch.retrievedContext; if(w&&w.uri) out.push({title:w.title||w.uri,uri:w.uri}); });
+  // dedupe por uri
+  const seen=new Set();
+  return out.filter(s=>{ if(seen.has(s.uri))return false; seen.add(s.uri); return true; });
+}
+let lastSources=[]; // fuentes del último llamado con grounding
+async function streamGemini(system,userContent,onChunk,options={}){
+  if(!hasKey()) throw {_diag:diagnoseGeminiError(undefined,{})};
+  lastSources=[];
+  const url=`${GEMINI_BASE}/${encodeURIComponent(getModel())}:streamGenerateContent?alt=sse&key=${encodeURIComponent(getKey())}`;
+  let res;
+  try{ res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(buildGeminiBody(system,userContent,options))}); }
+  catch{ throw {_diag:diagnoseGeminiError(0,{})}; }
+  if(!res.ok){ let b={}; try{b=await res.json();}catch{} throw {_diag:diagnoseGeminiError(res.status,b)}; }
+  const reader=res.body.getReader(); const dec=new TextDecoder(); let buf="";
+  while(true){
+    const {done,value}=await reader.read(); if(done) break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split("\n"); buf=lines.pop();
+    for(const l of lines){
+      const line=l.trim(); if(!line.startsWith("data:")) continue;
+      const data=line.slice(5).trim(); if(!data||data==="[DONE]") continue;
+      try{
+        const p=JSON.parse(data);
+        const fr=p.candidates?.[0]?.finishReason;
+        if(fr==="SAFETY"||fr==="RECITATION") throw {_diag:{title:"⚠ Respuesta bloqueada por Google",detail:"Gemini bloqueó la respuesta (motivo: "+fr+"). Probá reformular o cambiar de modelo.",action:"retry"}};
+        const src=extractSources(p.candidates?.[0]?.groundingMetadata); if(src.length) lastSources=src;
+        const txt=p.candidates?.[0]?.content?.parts?.[0]?.text; if(txt) onChunk(txt);
+      }catch(e){ if(e._diag) throw e; }
+    }
+  }
+}
+async function callGemini(system,userContent,options={}){
+  if(!hasKey()) throw {_diag:diagnoseGeminiError(undefined,{})};
+  lastSources=[];
+  const url=`${GEMINI_BASE}/${encodeURIComponent(getModel())}:generateContent?key=${encodeURIComponent(getKey())}`;
+  let res;
+  try{ res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(buildGeminiBody(system,userContent,options))}); }
+  catch{ throw {_diag:diagnoseGeminiError(0,{})}; }
+  if(!res.ok){ let b={}; try{b=await res.json();}catch{} throw {_diag:diagnoseGeminiError(res.status,b)}; }
+  const data=await res.json();
+  const fr=data.candidates?.[0]?.finishReason;
+  if(fr==="SAFETY"||fr==="RECITATION") throw {_diag:{title:"⚠ Respuesta bloqueada",detail:"Gemini bloqueó la respuesta (motivo: "+fr+").",action:"retry"}};
+  lastSources=extractSources(data.candidates?.[0]?.groundingMetadata);
+  return data.candidates?.[0]?.content?.parts?.map(p=>p.text||"").join("")||"";
+}
+async function testGeminiConnection(){
+  if(!hasKey()) return {ok:false,diag:diagnoseGeminiError(undefined,{})};
+  try{ const out=await callGemini("Respondé en una sola palabra.","Decí únicamente: listo",{maxTokens:20,temperature:0.1}); return {ok:true,sample:out}; }
+  catch(e){ return {ok:false,diag:e._diag||{title:"⚠ Falló el test",detail:String(e)}}; }
+}
+
+// ── Transcripción de audio vía Gemini (req 14) ──
+function blobToBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result.split(",")[1]);
+    r.onerror=()=>reject(new Error("No se pudo leer el audio."));
+    r.readAsDataURL(blob);
+  });
+}
+async function transcribeAudio(blob, mime){
+  if(!hasKey()) throw {_diag:diagnoseGeminiError(undefined,{})};
+  if(blob.size > 18*1024*1024) throw new Error("El audio supera ~18 MB (límite para transcripción directa). Recortalo o convertilo a un formato más comprimido (mp3/ogg).");
+  const b64=await blobToBase64(blob);
+  const parts=[
+    {inlineData:{mimeType:mime||blob.type||"audio/mpeg", data:b64}},
+    {text:"Transcribí este audio al español en texto corrido y fiel. No agregues comentarios, títulos ni resúmenes: solo la transcripción. Si hay varios hablantes y se distinguen, marcalos como «—»."}
+  ];
+  return await callGemini("Sos un transcriptor preciso. Devolvés solo la transcripción del audio, sin agregados.", parts, {maxTokens:4000,temperature:0.1});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MARKDOWN + HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function renderMd(text){
+  const ri=t=>t.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/\*(.*?)\*/g,"<em>$1</em>").replace(/`(.*?)`/g,'<code>$1</code>');
+  let html="";
+  (text||"").split("\n").forEach((line)=>{
+    const tr=line.trim();
+    if(/^#{1,4}\s/.test(tr)) html+=`<div class="md-sec">${esc(tr.replace(/^#{1,4}\s/,""))}</div>`;
+    else if(/^\*\*[^*]+\*\*:?$/.test(tr)) html+=`<div class="md-sec">${esc(tr.replace(/\*\*/g,"").replace(/:$/,""))}</div>`;
+    else if(/^[-•*]\s/.test(tr)) html+=`<div class="md-bul"><span class="md-dot">◦</span><span>${ri(esc(tr.replace(/^[-•*]\s/,"")))}</span></div>`;
+    else if(tr==="") html+=`<div style="height:.5em"></div>`;
+    else html+=`<p style="margin:0 0 .35em">${ri(esc(tr))}</p>`;
+  });
+  return html;
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function uid(p){return (p||"id")+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);}
+function today(){return new Date().toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"2-digit"});}
+function matsOfType(t){return materials.filter(m=>m.type===t);}
+function activeMat(){return materials.find(m=>m.id===activeMatId)||null;}
+function findCode(idOrName){return savedCodes.find(c=>c.id===idOrName||c.code.toLowerCase()===String(idOrName).toLowerCase());}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NAVEGACIÓN / ROUTER (req 2, 6, 9)
+// ═══════════════════════════════════════════════════════════════════════════
+function go(r, param){
+  route=r; routeParam=param??null;
+  // reset de estado transitorio según destino
+  if(["codificar","analizar"].includes(r)){
+    if(param && param.matId){ activeMatId=param.matId; }
+    workTab = WORK_TABS[r][0].key;
+    workEnfoque=""; workAiOut=""; workAiCodes=[]; workAiKind=""; workAiLoading=false; workAiMarks=[]; focusedAnn=null;
+  }
+  if(r==="recomendar"){ recOut=""; recErr=null; }
+  render();
+  const sc=document.getElementById("content"); if(sc) sc.scrollTop=0;
+}
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", darkMode?"dark":"light");
+  const tb=document.getElementById("theme-btn"); if(tb) tb.textContent=darkMode?"☾":"☀";
+}
+function badgeFor(key){
+  if(key==="saved") return (savedCodes.length+savedAnalyses.length)||null;
+  return materials.filter(m=>m.type===key).length||null;
+}
+function renderSidebar(){
+  const sb=document.getElementById("sidebar"); const isMobile=window.innerWidth<=760;
+  let html="";
+  for(const g of SIDEBAR_GROUPS){
+    if(!isMobile && g.section) html+=`<div class="s-sec">${g.section}</div>`;
+    else if(!isMobile && !g.section) html+=`<hr class="s-div">`;
+    for(const it of g.items){
+      const badge = it.badge?badgeFor(it.badge):null;
+      const locked = it.key==="recomendar" && !aiEnabled();
+      const active = (route===it.key) || (it.key==="codificar"&&route==="codificar") || (it.key==="analizar"&&route==="analizar");
+      html+=`<button class="s-btn${active?" active":""}${locked?" s-locked":""}" data-key="${it.key}">
+        <span class="s-sym" style="color:${it.col}">${it.sym}</span>
+        <div class="s-texts"><span class="s-name">${it.name}</span><span class="s-sub">${it.sub}</span></div>
+        ${badge?`<span class="s-badge">${badge}</span>`:(locked?'<span class="s-lock">◌</span>':'')}
+      </button>`;
+    }
+  }
+  // Botón destacado de respaldo / descarga de datos
+  if(!isMobile) html+=`<hr class="s-div">`;
+  html+=`<button class="s-backup-btn" id="sb-backup" title="Descargar un respaldo de todos tus datos"><span class="s-backup-sym">⤓</span><span class="s-backup-txt">Respaldar / Descargar datos</span></button>`;
+  if(!isMobile) html+=`<div class="s-footer">FARO<br>v10</div>`;
+  sb.innerHTML=html;
+  sb.querySelectorAll(".s-btn").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.key;
+    if(k==="proyecto"){ openProjectModal(); return; }
+    go(k);
+  }));
+  document.getElementById("sb-backup")?.addEventListener("click",exportAll);
+}
+function setBreadcrumbs(items){
+  // items: [{label, route?, param?}] — el último es el actual
+  const el=document.getElementById("breadcrumbs");
+  if(!items||items.length<=1){ el.innerHTML=""; return; }
+  let h="";
+  items.forEach((it,i)=>{
+    const last=i===items.length-1;
+    if(last) h+=`<span class="crumb current">${esc(it.label)}</span>`;
+    else h+=`<button class="crumb link" data-i="${i}">${esc(it.label)}</button><span class="crumb-sep">›</span>`;
+  });
+  el.innerHTML=h;
+  el.querySelectorAll(".crumb.link").forEach(b=>b.addEventListener("click",()=>{
+    const it=items[+b.dataset.i]; go(it.route, it.param);
+  }));
+}
+function updateStatus(){
+  const dot=document.getElementById("status-dot"), lbl=document.getElementById("status-label");
+  const sw=document.getElementById("ai-switch"); if(sw) sw.classList.toggle("on",aiEnabled());
+  if(!dot) return;
+  if(!loaded){ dot.style.background="#B85C38"; lbl.textContent="Cargando…"; return; }
+  if(aiEnabled()){ dot.style.background="#34A853"; lbl.textContent="IA activada"; }
+  else if(hasKey()){ dot.style.background="#B85C38"; lbl.textContent="IA en pausa"; }
+  else { dot.style.background="#B85C38"; lbl.textContent="Sin IA"; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RENDER DISPATCH
+// ═══════════════════════════════════════════════════════════════════════════
+function render(){
+  const app=document.getElementById("app"); if(app) app.classList.toggle("ai-off",!aiEnabled());
+  renderSidebar(); updateStatus();
+  const c=document.getElementById("content");
+  switch(route){
+    case "home": setBreadcrumbs([]); renderHome(); break;
+    case "notas-campo": case "entrevistas": case "documentos": renderMaterialsView(route); break;
+    case "codificar": case "analizar": renderWorkView(route); break;
+    case "nube": renderNubeView(); break;
+    case "profundidad": renderProfundidadView(); break;
+    case "code-detail": renderCodeDetail(routeParam); break;
+    case "citar": renderCitarView(); break;
+    case "recomendar": renderRecomendarView(); break;
+    case "config": renderConfigView(); break;
+    default: renderHome();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HOME DASHBOARD (req 2, 6)
+// ═══════════════════════════════════════════════════════════════════════════
+function renderHome(){
+  const c=document.getElementById("content");
+  const feats=[
+    {key:"codificar",sym:"◈",col:"#2D6A4F",title:"Codificar",ai:true,desc:"Asigná códigos a fragmentos en doble panel. Generá códigos o pensá preguntas, con códigos sugeridos y propios."},
+    {key:"analizar",sym:"◉",col:"#1E3A2F",title:"Analizar",ai:true,desc:"Escritura densa, vínculos con la bibliografía y con otras fuentes, con el enfoque que elijas."},
+    {key:"profundidad",sym:"❖",col:"#2A5A8C",title:"Trabajo en profundidad",desc:"Explorá varios trabajos juntos: códigos, análisis, recomendaciones y coincidencias entre materiales."},
+    {key:"citar",sym:"◎",col:"#B85C38",title:"Citar",desc:"APA 7 y Chicago 17 desde formulario. La IA puede buscar y completar datos que falten. Funciona sin IA."},
+    {key:"recomendar",sym:"◌",col:"#7B5EA7",title:"Recomendar bibliografía",ai:true,desc:"Búsqueda multilingüe sin sesgo Norte-Sur ni de género, con búsqueda web real opcional (gratis) y fuentes citadas."},
+    {key:"notas-campo",sym:"✎",col:"#2A5A8C",title:"Materiales",desc:"Cargá notas de campo, entrevistas y bibliografía. TXT, MD, PDF y DOCX, extraídos localmente."},
+    {key:"nube",sym:"◆",col:"#7B5EA7",title:"Nube del proyecto",desc:"Tus códigos, análisis y recomendaciones guardados, y los vínculos entre ellos."},
+  ];
+  c.innerHTML=`<div class="wrap">
+    <div class="intro-box">
+      <div class="intro-sigil">◈</div>
+      <div class="intro-title"><em>FARO</em></div>
+      <div class="intro-subtitle">Fichero Analítico de Registro y Observación</div>
+      <div class="intro-divider"></div>
+      <p class="intro-desc">
+        Una plataforma de acompañamiento metodológico para etnógrafxs, investigadorxs sociales y estudiantes de ciencias sociales. Combiná las herramientas clásicas del trabajo de campo (codificación, anotación, lectura analítica, construcción bibliográfica) con análisis asistido por inteligencia artificial — <em>de uso opcional, gratuito y con tu propia clave</em>.
+      </p>
+      <div class="intro-features">
+        ${feats.map(f=>`<button class="intro-feat" data-key="${f.key}">
+          <span class="intro-feat-sym" style="color:${f.col}">${f.sym}</span>
+          <div class="intro-feat-text"><span class="intro-feat-title">${f.title}${f.ai?' <span class="intro-aitag">IA</span>':''}</span>${f.desc}</div>
+        </button>`).join("")}
+      </div>
+      <button class="intro-feat" id="home-setproj" style="max-width:500px;margin:0 auto .9rem;justify-content:center">
+        <span class="intro-feat-sym" style="color:#2D6A4F">◈</span>
+        <div class="intro-feat-text"><span class="intro-feat-title">${project.tema?"Mi proyecto":"Configurar mi proyecto"}</span>${project.tema?esc(project.tema):"Cargá tema, objetivo, población y enfoque para orientar todo el trabajo."}</div>
+      </button>
+      <div class="intro-note">
+        Tu trabajo se guarda solo en este navegador · La IA es opcional (clave gratuita de Gemini) · Conviene exportar de vez en cuando un respaldo
+      </div>
+    </div>
+  </div>`;
+  c.querySelectorAll(".intro-feat[data-key]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.key)));
+  document.getElementById("home-setproj")?.addEventListener("click",openProjectModal);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODAL DE PROYECTO (req 7)
+// ═══════════════════════════════════════════════════════════════════════════
+function openModal(html){ const m=document.getElementById("modal"); document.getElementById("modal-box").innerHTML=html; m.classList.add("show"); }
+function closeModal(){ document.getElementById("modal").classList.remove("show"); }
+document.getElementById("modal").addEventListener("click",e=>{ if(e.target.id==="modal") closeModal(); });
+
+function projField(label,id,val,ph,ta){
+  return `<div class="field-row"><label class="field-label">${label}</label>${ta
+    ?`<textarea class="field-ta" id="${id}" placeholder="${ph}">${esc(val||"")}</textarea>`
+    :`<input class="field-in" id="${id}" placeholder="${ph}" value="${esc(val||"")}"/>`}</div>`;
+}
+function openProjectModal(){
+  const p=project;
+  openModal(`
+    <div class="modal-head"><div class="modal-title">Tu proyecto <em>· memoria de la investigación</em></div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="tip" style="margin-bottom:1rem">Esta información queda solo en tu navegador y acompaña cada consulta a la IA, para mantener las sugerencias dentro del marco de tu proyecto.</div>
+      ${projField("Tema de investigación","p-tema",p.tema,"Ej: Relaciones intergeneracionales y tecnología digital en familias")}
+      ${projField("Objetivo central de la investigación","p-og",p.objetivoGeneral,"Qué busca comprender o explicar la investigación",true)}
+      ${projField("Objetivos específicos","p-oe",p.objetivosEspecificos,"Uno por línea",true)}
+      ${projField("Enfoque teórico","p-enf",p.enfoque,"Autores, corrientes o conceptos que orientan tu mirada",true)}
+      ${projField("Población (sujetos, espacios, etc.)","p-pob",p.poblacion,"Sujetos, grupos, espacios, contexto o terreno de la investigación",true)}
+      ${projField("Estado del arte","p-arte",p.estadoArte,"Antecedentes y discusiones previas sobre el tema",true)}
+      ${projField("Metodología","p-met",p.metodologia,"Diseño, técnicas de producción de datos, etc.",true)}
+    </div>
+    <div class="modal-foot"><button class="btn outline" id="m-skip">Cerrar</button><button class="btn green" id="m-save">Guardar proyecto</button></div>`);
+  document.getElementById("m-close").onclick=closeModal;
+  document.getElementById("m-skip").onclick=closeModal;
+  document.getElementById("m-save").onclick=()=>{
+    project={tema:val("p-tema"),objetivoGeneral:val("p-og"),objetivosEspecificos:val("p-oe"),enfoque:val("p-enf"),campo:"",poblacion:val("p-pob"),estadoArte:val("p-arte"),metodologia:val("p-met")};
+    markDirty(); persist(); closeModal(); showToast("Proyecto guardado ✓"); render();
+  };
+}
+function val(id){return (document.getElementById(id)?.value||"").trim();}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CARGA DE ARCHIVOS Y AUDIO
+// ═══════════════════════════════════════════════════════════════════════════
+async function extractPdfText(file){
+  if(!window.pdfjsLib) throw new Error("pdf.js no cargó. Revisá tu conexión y recargá.");
+  if(file.size>50*1024*1024) throw new Error("El PDF pesa más de 50 MB. Probá uno más liviano.");
+  const pdf=await window.pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  let full="",nonEmpty=0;
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i); const content=await page.getTextContent();
+    const t=content.items.map(it=>it.str).join(" ").replace(/\s+/g," ").trim();
+    if(t.length>10) nonEmpty++;
+    full+=t+"\n\n";
+    if(pdf.numPages>5 && i%5===0) showToast(`Extrayendo página ${i}/${pdf.numPages}…`);
+  }
+  full=full.replace(/\n{3,}/g,"\n\n").trim();
+  if(nonEmpty===0) throw new Error("No se encontró texto: parece un PDF escaneado (imágenes). pdf.js no puede leerlo.");
+  return full;
+}
+async function extractDocxText(file){
+  if(!window.mammoth) throw new Error("mammoth.js no cargó. Revisá tu conexión y recargá.");
+  const r=await window.mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});
+  const t=(r.value||"").replace(/\n{3,}/g,"\n\n").trim();
+  if(!t) throw new Error("No se encontró texto en este .docx.");
+  return t;
+}
+async function readFileText(file){
+  const ext=file.name.split(".").pop().toLowerCase();
+  if(ext==="pdf"){ showToast("Extrayendo PDF localmente…"); return await extractPdfText(file); }
+  if(ext==="docx"){ showToast("Extrayendo .docx localmente…"); return await extractDocxText(file); }
+  if(["txt","md","csv"].includes(ext)) return await file.text();
+  if(ext==="doc") throw new Error("Los .doc antiguos no se leen en el navegador. Guardalo como .docx o .txt.");
+  throw new Error(`Formato no soportado: .${ext}`);
+}
+async function handleFileUpload(files, type, folder){
+  for(const file of files){
+    try{
+      const text=await readFileText(file);
+      if(!text||!text.trim()){ showToast("No se pudo extraer texto de "+file.name); continue; }
+      materials.push({id:uid("mat"),type,name:file.name,text,folder:folder||null,date:today(),anns:[]});
+      markDirty(); showToast(`“${file.name}” cargado ✓`);
+    }catch(e){ showToast(e.message||"Error al procesar "+file.name); }
+  }
+  await persist(); render();
+}
+
+// audio
+let _mediaRec=null,_recChunks=[],_recType=null,_recFolder=null;
+function audioWarnAndTranscribe(blob, mime, type, folder, suggestedName){
+  openModal(`
+    <div class="modal-head"><div class="modal-title">Transcribir audio</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="warn-box"><strong>Atención:</strong> la transcripción se hace con <strong>Gemini</strong> y <strong>consume parte de tu cuota diaria gratuita</strong> (cuenta como una consulta y gasta tokens según la duración del audio). Audios largos pueden acercarte al tope del día.</div>
+      <div class="field-row"><label class="field-label">Nombre del material</label><input class="field-in" id="aud-name" value="${esc(suggestedName||"Audio "+today())}"/></div>
+      <div class="tip">Tamaño del audio: ${(blob.size/1024/1024).toFixed(2)} MB · Después vas a poder corregir la transcripción a mano.</div>
+    </div>
+    <div class="modal-foot"><button class="btn outline" id="m-cancel">Cancelar</button><button class="btn green" id="m-go">Transcribir con Gemini</button></div>`);
+  document.getElementById("m-close").onclick=closeModal;
+  document.getElementById("m-cancel").onclick=closeModal;
+  document.getElementById("m-go").onclick=async()=>{
+    const name=val("aud-name")||"Audio";
+    const btn=document.getElementById("m-go"); btn.disabled=true; btn.innerHTML='<span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span> Transcribiendo…';
+    try{
+      const txt=await transcribeAudio(blob, mime);
+      materials.push({id:uid("mat"),type,name,text:txt,folder:folder||null,date:today(),anns:[],fromAudio:true});
+      markDirty(); await persist(); closeModal(); showToast("Transcripción lista · revisala y corregí ✓"); render();
+    }catch(e){
+      const d=e._diag; closeModal();
+      openModal(`<div class="modal-head"><div class="modal-title">No se pudo transcribir</div><button class="modal-close" id="m-close">✕</button></div>
+        <div class="modal-body"><div class="err-detail"><div class="err-detail-title">${esc(d?.title||"⚠ Error")}</div><div class="err-detail-body">${esc(d?.detail||e.message||String(e))}</div></div></div>
+        <div class="modal-foot"><button class="btn green" id="m-ok">Entendido</button></div>`);
+      document.getElementById("m-close").onclick=closeModal; document.getElementById("m-ok").onclick=closeModal;
+    }
+  };
+}
+async function startRecording(type,folder){
+  if(!navigator.mediaDevices?.getUserMedia){ showToast("Tu navegador no permite grabar audio."); return; }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    _recChunks=[]; _recType=type; _recFolder=folder;
+    _mediaRec=new MediaRecorder(stream);
+    _mediaRec.ondataavailable=e=>{ if(e.data.size) _recChunks.push(e.data); };
+    _mediaRec.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      const blob=new Blob(_recChunks,{type:_mediaRec.mimeType||"audio/webm"});
+      audioWarnAndTranscribe(blob, blob.type, _recType, _recFolder, "Grabación "+today());
+    };
+    _mediaRec.start(); renderMaterialsView(type);
+  }catch(e){ showToast("No se pudo acceder al micrófono."); }
+}
+function stopRecording(){ if(_mediaRec&&_mediaRec.state!=="inactive") _mediaRec.stop(); _mediaRec=null; }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VISTA DE MATERIALES (notas-campo / entrevistas / documentos=bibliografía)
+// ═══════════════════════════════════════════════════════════════════════════
+let activeFolder = null; // filtro de carpeta (solo bibliografía)
+function renderMaterialsView(type){
+  const meta=MATERIAL_TYPES[type]; const isBiblio=type==="documentos";
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:meta.name}]);
+  const c=document.getElementById("content");
+  let list=matsOfType(type);
+  if(isBiblio && activeFolder) list=list.filter(m=>m.folder===activeFolder);
+
+  const folderBar = isBiblio ? `
+    <div class="home-section-label">Carpetas temáticas</div>
+    <div class="folder-bar">
+      <button class="folder-chip${!activeFolder?" active":""}" data-folder="">Todas <span class="fc-count">${matsOfType("documentos").length}</span></button>
+      ${folders.map(f=>`<button class="folder-chip${activeFolder===f.id?" active":""}" data-folder="${f.id}">${esc(f.name)} <span class="fc-count">${matsOfType("documentos").filter(m=>m.folder===f.id).length}</span> <span class="icon-x" data-del="${f.id}" title="Eliminar carpeta" style="margin-left:.3rem;opacity:.6">✕</span></button>`).join("")}
+      <button class="folder-chip" id="add-folder">+ Nueva carpeta</button>
+    </div>` : "";
+
+  const audioCtrls = meta.audio ? `
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;justify-content:center;">
+      <label class="btn outline sm" style="cursor:pointer">❝ Importar audio<input type="file" accept="audio/*" id="aud-file" hidden/></label>
+      ${_mediaRec?`<button class="btn amber sm" id="rec-stop"><span class="rec-dot"></span> Detener y transcribir</button>`:`<button class="btn outline sm" id="rec-start">● Grabar audio</button>`}
+    </div>
+    <div class="tip" style="text-align:center;margin-top:.4rem">El audio se transcribe con Gemini (consume cuota) y queda editable.</div>` : "";
+
+  c.innerHTML=`<div class="wrap">
+    <div class="page-head">
+      <div class="page-title"><span style="color:${meta.col}">${meta.sym}</span> ${meta.name}</div>
+      <div class="page-sub">${isBiblio
+        ? "Repositorio de materiales de tu investigación, independiente del análisis. Organizá en carpetas y vinculalos como insumo de la IA desde Codificar/Analizar."
+        : "Cargá y leé tu material. Podés abrirlo para codificar o analizar en doble panel."}</div>
+    </div>
+    ${folderBar}
+    <div class="upload-zone" id="upzone">
+      <div class="upload-sym">⤒</div>
+      <div class="upload-text">Arrastrá archivos acá o <strong>hacé clic para elegir</strong></div>
+      <div class="upload-hint">PDF · DOCX · TXT · MD · CSV — se procesan en tu navegador, no se suben a ningún servidor</div>
+      <input type="file" id="file-input" multiple accept=".pdf,.docx,.txt,.md,.csv" hidden/>
+    </div>
+    ${audioCtrls}
+    ${list.length===0
+      ? `<div class="empty-state"><div class="empty-sigil">${meta.sym}</div><div class="empty-text">Todavía no hay ${meta.name.toLowerCase()}.<br>Cargá tu primer material arriba.</div></div>`
+      : `<div class="mat-list">${list.map(m=>matItemHtml(m,isBiblio)).join("")}</div>`}
+  </div>`;
+
+  // upload bindings
+  const zone=document.getElementById("upzone"), fi=document.getElementById("file-input");
+  zone.onclick=()=>fi.click();
+  fi.onchange=()=>{ if(fi.files.length) handleFileUpload(fi.files,type,isBiblio?activeFolder:null); };
+  zone.ondragover=e=>{e.preventDefault();zone.classList.add("drag");};
+  zone.ondragleave=()=>zone.classList.remove("drag");
+  zone.ondrop=e=>{e.preventDefault();zone.classList.remove("drag");if(e.dataTransfer.files.length)handleFileUpload(e.dataTransfer.files,type,isBiblio?activeFolder:null);};
+  // audio bindings
+  document.getElementById("aud-file")?.addEventListener("change",ev=>{ const f=ev.target.files[0]; if(f) audioWarnAndTranscribe(f,f.type,type,isBiblio?activeFolder:null,f.name.replace(/\.[^.]+$/,"")); });
+  document.getElementById("rec-start")?.addEventListener("click",()=>startRecording(type,isBiblio?activeFolder:null));
+  document.getElementById("rec-stop")?.addEventListener("click",stopRecording);
+  // folder bindings
+  c.querySelectorAll(".folder-chip[data-folder]").forEach(b=>b.addEventListener("click",e=>{
+    if(e.target.dataset.del){ deleteFolder(e.target.dataset.del); return; }
+    activeFolder=b.dataset.folder||null; render();
+  }));
+  document.getElementById("add-folder")?.addEventListener("click",addFolder);
+  // item bindings
+  c.querySelectorAll(".mat-item").forEach(el=>{
+    const id=el.dataset.id;
+    el.querySelector(".mi-open")?.addEventListener("click",()=>openMaterialEditor(id));
+    el.querySelector(".mi-cod")?.addEventListener("click",()=>go("codificar",{matId:id}));
+    el.querySelector(".mi-ana")?.addEventListener("click",()=>go("analizar",{matId:id}));
+    el.querySelector(".mi-del")?.addEventListener("click",()=>deleteMaterial(id));
+    el.querySelector(".mi-folder")?.addEventListener("change",e=>{ const m=materials.find(x=>x.id===id); if(m){m.folder=e.target.value||null; markDirty(); persist();} });
+  });
+}
+function matItemHtml(m,isBiblio){
+  const meta=MATERIAL_TYPES[m.type];
+  const nAnn=(m.anns||[]).length;
+  const folderSel=isBiblio?`<select class="field-sel mi-folder" style="width:auto;padding:.2rem .4rem;font-size:.7rem"><option value="">— sin carpeta —</option>${folders.map(f=>`<option value="${f.id}"${m.folder===f.id?" selected":""}>${esc(f.name)}</option>`).join("")}</select>`:"";
+  return `<div class="mat-item" data-id="${m.id}">
+    <span class="mat-sym" style="color:${meta.col}">${meta.sym}</span>
+    <div class="mat-info">
+      <div class="mat-name">${esc(m.name)}${m.fromAudio?' <span class="intro-aitag">audio</span>':''}</div>
+      <div class="mat-meta">${(m.text||"").length.toLocaleString("es-AR")} caracteres · ${m.date||""}${nAnn?` · ${nAnn} marca${nAnn!==1?"s":""}`:""}</div>
+    </div>
+    ${folderSel}
+    <div class="mat-actions">
+      <button class="icon-btn mi-open" title="Abrir / editar">✎</button>
+      ${!isBiblio?`<button class="icon-btn mi-cod" title="Codificar">◈</button><button class="icon-btn mi-ana" title="Analizar">◉</button>`:""}
+      <button class="icon-btn danger mi-del" title="Eliminar">🗑</button>
+    </div>
+  </div>`;
+}
+function addFolder(){
+  openModal(`<div class="modal-head"><div class="modal-title">Nueva carpeta</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body"><div class="field-row"><label class="field-label">Nombre de la carpeta temática</label><input class="field-in" id="f-name" placeholder="Ej: Estado del arte, Teoría, Metodología…"/></div></div>
+    <div class="modal-foot"><button class="btn outline" id="m-cancel">Cancelar</button><button class="btn green" id="m-ok">Crear</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-cancel").onclick=closeModal;
+  document.getElementById("m-ok").onclick=()=>{ const n=val("f-name"); if(!n){showToast("Poné un nombre");return;} folders.push({id:uid("fol"),name:n}); markDirty(); persist(); closeModal(); render(); };
+  setTimeout(()=>document.getElementById("f-name")?.focus(),50);
+}
+function deleteFolder(fid){
+  confirmModal("¿Eliminar carpeta?","Los materiales que tenía quedan sin carpeta (no se borran).",()=>{
+    folders=folders.filter(f=>f.id!==fid);
+    materials.forEach(m=>{ if(m.folder===fid) m.folder=null; });
+    if(activeFolder===fid) activeFolder=null;
+    markDirty(); persist(); render();
+  });
+}
+function deleteMaterial(id){
+  const m=materials.find(x=>x.id===id);
+  confirmModal("¿Eliminar material?",`Se va a borrar “${esc(m?.name||"")}” y sus ${(m?.anns||[]).length} marca(s). Esta acción no se puede deshacer.`,()=>{
+    materials=materials.filter(x=>x.id!==id); markDirty(); persist(); showToast("Material eliminado"); render();
+  });
+}
+function openMaterialEditor(id){
+  const m=materials.find(x=>x.id===id); if(!m) return;
+  const isNote = m.type!=="documentos";
+  openModal(`<div class="modal-head"><div class="modal-title">${MATERIAL_TYPES[m.type].sym} ${isNote?"Editar":"Ver"} material</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="field-row"><label class="field-label">Nombre</label><input class="field-in" id="ed-name" value="${esc(m.name)}"/></div>
+      <div class="field-row"><label class="field-label">Texto ${m.fromAudio?"(transcripción — corregí lo que haga falta)":""}</label>
+        <textarea class="field-ta" id="ed-text" style="min-height:46vh;line-height:1.8">${esc(m.text||"")}</textarea></div>
+      <div class="tip" id="ed-saved">Los cambios se guardan automáticamente.</div>
+    </div>
+    <div class="modal-foot">
+      ${isNote?`<button class="btn outline" id="ed-cod">◈ Codificar</button><button class="btn outline" id="ed-ana">◉ Analizar</button>`:""}
+      <button class="btn green" id="ed-done">Listo</button>
+    </div>`);
+  const save=()=>{ m.name=val("ed-name")||m.name; m.text=document.getElementById("ed-text").value; markDirty(); };
+  document.getElementById("ed-name").addEventListener("input",save);
+  document.getElementById("ed-text").addEventListener("input",()=>{ save(); document.getElementById("ed-saved").textContent="Guardando…"; clearTimeout(window._edT); window._edT=setTimeout(()=>{persist();document.getElementById("ed-saved").textContent="Guardado ✓";},700); });
+  document.getElementById("m-close").onclick=()=>{persist();closeModal();render();};
+  document.getElementById("ed-done").onclick=()=>{persist();closeModal();render();};
+  document.getElementById("ed-cod")?.addEventListener("click",()=>{persist();closeModal();go("codificar",{matId:id});});
+  document.getElementById("ed-ana")?.addEventListener("click",()=>{persist();closeModal();go("analizar",{matId:id});});
+}
+function confirmModal(title,body,onYes,danger){
+  openModal(`<div class="modal-head"><div class="modal-title">${esc(title)}</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body"><div style="font-size:.9rem;line-height:1.6;color:var(--text2)">${body}</div></div>
+    <div class="modal-foot"><button class="btn outline" id="m-no">Cancelar</button><button class="btn ${danger?"danger":"green"}" id="m-yes">Sí, continuar</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-no").onclick=closeModal;
+  document.getElementById("m-yes").onclick=()=>{ closeModal(); onYes(); };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MÓDULO SPLIT-SCREEN — anotaciones por offset (req 10)
+// ═══════════════════════════════════════════════════════════════════════════
+let focusedAnn = null;     // anotación seleccionada (panel derecho muestra su código/análisis)
+let workAiMarks = [];      // marcas sugeridas por IA: {term,start,end}
+
+// Construye el HTML del texto con resaltados persistentes + marcas IA (sin solapar).
+function buildAnnotatedHtml(m){
+  const text=m.text||"";
+  // anotaciones reales (prioridad) — válidas por offset
+  let segs=(m.anns||[]).filter(a=>a.start>=0&&a.end>a.start&&a.end<=text.length)
+    .map(a=>({start:a.start,end:a.end,ann:a}))
+    .sort((x,y)=>x.start-y.start);
+  // descartar solapadas
+  const clean=[]; let lastEnd=-1;
+  for(const s of segs){ if(s.start>=lastEnd){ clean.push(s); lastEnd=s.end; } }
+  // marcas IA que no solapen con anotaciones reales
+  const aiSegs=workAiMarks.filter(mk=>!clean.some(s=>mk.start<s.end&&mk.end>s.start))
+    .map(mk=>({start:mk.start,end:mk.end,ai:true,term:mk.term})).sort((x,y)=>x.start-y.start);
+  // fusionar todo y reordenar evitando solapes entre IA
+  let all=[...clean]; let aiLast=-1;
+  for(const a of aiSegs){ if(a.start>=aiLast && !all.some(s=>a.start<s.end&&a.end>s.start)){ all.push(a); aiLast=a.end; } }
+  all.sort((x,y)=>x.start-y.start);
+  let html="",cur=0;
+  for(const s of all){
+    if(s.start<cur) continue;
+    html+=esc(text.slice(cur,s.start));
+    const frag=esc(text.slice(s.start,s.end));
+    if(s.ai){ html+=`<mark class="ai-suggest" data-ai="1" data-term="${esc(s.term)}" data-s="${s.start}" data-e="${s.end}">${frag}</mark>`; }
+    else { const a=s.ann; const cls=a.kind==="highlight"?"":"coded"; html+=`<mark class="${cls}" data-ann="${a.id}">${frag}</mark>`; }
+    cur=s.end;
+  }
+  html+=esc(text.slice(cur));
+  return html;
+}
+// offsets de la selección relativos al texto crudo del material
+function getSelOffsets(container){
+  const sel=window.getSelection();
+  if(!sel||sel.rangeCount===0||sel.isCollapsed) return null;
+  const range=sel.getRangeAt(0);
+  if(!container.contains(range.startContainer)||!container.contains(range.endContainer)) return null;
+  const pre=document.createRange(); pre.selectNodeContents(container); pre.setEnd(range.startContainer,range.startOffset);
+  const start=pre.toString().length; const quote=range.toString(); const end=start+quote.length;
+  if(!quote.trim()) return null;
+  return {start,end,quote};
+}
+// busca ocurrencias de un término en el texto → marcas
+function termOccurrences(text,term,max){
+  const out=[]; if(!term||term.length<3) return out;
+  const lc=text.toLowerCase(), q=term.toLowerCase(); let i=0,n=0;
+  while((i=lc.indexOf(q,i))!==-1 && n<(max||3)){ out.push({term,start:i,end:i+term.length}); i+=term.length; n++; }
+  return out;
+}
+
+// ── Menú contextual sobre selección ──
+function showCtxMenu(x,y,mode){
+  const menu=document.getElementById("ctx-menu");
+  const word = mode==="codificar"?"código":"análisis";
+  menu.innerHTML=`
+    <button class="ctx-item" data-act="save"><span class="ci-sym">＋</span> Guardar como ${word}</button>
+    <button class="ctx-item" data-act="writenew"><span class="ci-sym">✎</span> Escribir ${word} vinculado</button>
+    <button class="ctx-item" data-act="link"><span class="ci-sym">⛓</span> Vincular a ${word} preexistente</button>
+    <button class="ctx-item" data-act="hl"><span class="ci-sym">▤</span> Solo resaltar</button>`;
+  menu.style.left=Math.min(x,window.innerWidth-230)+"px";
+  menu.style.top=(y+6)+"px";
+  menu.classList.add("show");
+  menu.querySelectorAll(".ctx-item").forEach(b=>b.onclick=()=>{ hideCtxMenu(); ctxAction(b.dataset.act,mode); });
+}
+function hideCtxMenu(){ document.getElementById("ctx-menu").classList.remove("show"); }
+document.addEventListener("click",e=>{ if(!e.target.closest("#ctx-menu")&&!e.target.closest(".doc-text")) hideCtxMenu(); });
+
+function ctxAction(act,mode){
+  if(!pendingSel) return;
+  const m=activeMat(); if(!m) return;
+  if(act==="hl"){
+    m.anns.push({id:uid("ann"),kind:"highlight",quote:pendingSel.quote,start:pendingSel.start,end:pendingSel.end,date:today()});
+    markDirty(); persist(); pendingSel=null; renderWorkView(mode); return;
+  }
+  // Guardar como código/análisis → automático, tal cual (nombre = el fragmento, abreviado)
+  if(act==="save"){
+    const auto=pendingSel.quote.trim().replace(/\s+/g," ");
+    const name=auto.length>48?auto.slice(0,48)+"…":auto;
+    attachCode(m,name,pendingSel,mode); return;
+  }
+  // Escribir código/análisis vinculado → casilla para nombrar uno nuevo
+  if(act==="writenew"){ promptCodeName(mode,(name)=>{ attachCode(m,name,pendingSel,mode); }); return; }
+  // Vincular a preexistente
+  if(act==="link"){ pickExistingCode((code)=>{ attachCode(m,code.code,pendingSel,mode,code.id); }); return; }
+}
+function attachCode(m,name,sel,mode,existingId){
+  let code=findCode(existingId||name);
+  if(!code){ code={id:uid("cod"),code:name,date:today()}; savedCodes.push(code); }
+  const kindLabel = mode==="codificar"?"código":"análisis";
+  m.anns.push({id:uid("ann"),kind:"code",codeId:code.id,label:code.code,quote:sel.quote,start:sel.start,end:sel.end,annMode:mode,date:today()});
+  markDirty(); persist(); pendingSel=null; showToast(`${kindLabel.charAt(0).toUpperCase()+kindLabel.slice(1)} “${code.code.length>24?code.code.slice(0,24)+"…":code.code}” aplicado ✓`); renderWorkView(mode);
+}
+function promptCodeName(mode,cb){
+  const suggs=savedCodes.slice(0,12);
+  openModal(`<div class="modal-head"><div class="modal-title">Guardar como código</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="tip" style="margin-bottom:.6rem">Fragmento: <em>“${esc((pendingSel?.quote||"").slice(0,140))}${(pendingSel?.quote||"").length>140?"…":""}”</em></div>
+      <div class="field-row"><label class="field-label">Nombre del código</label><input class="field-in" id="code-name" placeholder="Ej: cuidado, frontera, espera…"/></div>
+      ${suggs.length?`<div class="tip" style="margin-bottom:.3rem">Existentes:</div><div class="codelist">${suggs.map(c=>`<button class="codelist-item csg" data-c="${esc(c.code)}">${esc(c.code)}</button>`).join("")}</div>`:""}
+    </div>
+    <div class="modal-foot"><button class="btn outline" id="m-cancel">Cancelar</button><button class="btn green" id="m-ok">Guardar</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-cancel").onclick=closeModal;
+  document.querySelectorAll(".csg").forEach(b=>b.onclick=()=>document.getElementById("code-name").value=b.dataset.c);
+  document.getElementById("m-ok").onclick=()=>{ const n=val("code-name"); if(!n){showToast("Poné un nombre");return;} closeModal(); cb(n); };
+  setTimeout(()=>document.getElementById("code-name")?.focus(),50);
+}
+function pickExistingCode(cb){
+  if(!savedCodes.length){ showToast("Todavía no hay códigos. Creá uno con «Guardar como código»."); return; }
+  openModal(`<div class="modal-head"><div class="modal-title">Vincular a código existente</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body"><div class="codelist">${savedCodes.map(c=>`<button class="codelist-item cpick" data-id="${c.id}">${esc(c.code)}</button>`).join("")}</div></div>
+    <div class="modal-foot"><button class="btn outline" id="m-cancel">Cancelar</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-cancel").onclick=closeModal;
+  document.querySelectorAll(".cpick").forEach(b=>b.onclick=()=>{ const c=savedCodes.find(x=>x.id===b.dataset.id); closeModal(); cb(c); });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ÁREA DE TRABAJO — Codificar (2 pestañas) / Analizar (3 pestañas)
+// ═══════════════════════════════════════════════════════════════════════════
+const WORK_TABS = {
+  codificar:[{key:"codigos",title:"Generar códigos"},{key:"preguntas",title:"Pensar preguntas"}],
+  analizar:[{key:"escribir",title:"Escribir análisis"},{key:"biblio",title:"Vínculo con bibliografía"},{key:"fuentes",title:"Vínculo con otras fuentes"}],
+};
+// Ejes/dimensiones que orientan a la IA (menú "especificar enfoque", no pestañas).
+const ENFOQUES = {
+  codificar:[{key:"resuenan",t:"Palabras que resuenan"},{key:"entradas",t:"Entradas analíticas"},{key:"borde",t:"Lo que queda en el borde"},{key:"preguntas",t:"Preguntas para volver al campo"},{key:"conexion",t:"Una conexión posible"}],
+  analizar:[{key:"densa",t:"Escritura densa"},{key:"interrogantes",t:"Interrogantes"},{key:"tensiones",t:"Tensiones"},{key:"escalas",t:"Escalas"},{key:"hipotesis",t:"Hipótesis"},{key:"marginal",t:"Lo marginal"}],
+};
+let workAiKind = "";       // qué generó la última salida IA
+let workAiCodes = [];      // códigos sugeridos por IA (chips)
+
+function refreshPanel(mode,m){ const p=document.getElementById("tool-panel"); if(p){ p.innerHTML=renderToolPanel(mode,m); bindToolPanel(mode,m); } }
+
+function renderWorkView(mode){
+  const meta = mode==="codificar" ? {sym:"◈",col:"#2D6A4F",name:"Codificar"} : {sym:"◉",col:"#1E3A2F",name:"Analizar"};
+  const m=activeMat();
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:meta.name},{label:m?m.name:"Elegir material"}]);
+  const c=document.getElementById("content");
+
+  if(!m){
+    const all=materials.filter(x=>WORK_TYPES.includes(x.type));
+    c.innerHTML=`<div class="wrap">
+      <div class="page-head"><div class="page-title"><span style="color:${meta.col}">${meta.sym}</span> ${meta.name}</div>
+      <div class="page-sub">Elegí un material, subí un archivo, importá un audio o pegá un fragmento suelto. A la izquierda vas a ver el texto; a la derecha, las herramientas.</div></div>
+      <div class="upload-zone" id="w-upzone" style="margin-bottom:.7rem">
+        <div class="upload-sym">⤒</div>
+        <div class="upload-text">Arrastrá un archivo acá o <strong>hacé clic para elegir</strong></div>
+        <div class="upload-hint">PDF · DOCX · TXT · MD · CSV — se procesan en tu navegador y se abren para trabajar</div>
+        <input type="file" id="w-file" multiple accept=".pdf,.docx,.txt,.md,.csv" hidden/>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="btn green sm" id="w-paste">＋ Pegar o escribir un fragmento</button>
+        <label class="btn outline sm" style="cursor:pointer">❝ Importar audio<input type="file" accept="audio/*" id="w-aud" hidden/></label>
+      </div>
+      ${all.length===0
+        ? `<div class="empty-state"><div class="empty-sigil">${meta.sym}</div><div class="empty-text">No hay materiales todavía.<br>Subí un archivo, importá un audio o pegá un fragmento.</div></div>`
+        : `<div class="mat-list">${all.map(x=>`<div class="mat-item" data-id="${x.id}"><span class="mat-sym" style="color:${MATERIAL_TYPES[x.type].col}">${MATERIAL_TYPES[x.type].sym}</span><div class="mat-info"><div class="mat-name">${esc(x.name)}</div><div class="mat-meta">${MATERIAL_TYPES[x.type].name} · ${(x.anns||[]).length} marcas</div></div><button class="btn green sm pick">Abrir</button></div>`).join("")}</div>`}
+    </div>`;
+    c.querySelectorAll(".mat-item").forEach(el=>el.querySelector(".pick").onclick=()=>{activeMatId=el.dataset.id;resetWorkAi();renderWorkView(mode);});
+    document.getElementById("w-paste").onclick=()=>pasteFragment(mode);
+    const wz=document.getElementById("w-upzone"), wf=document.getElementById("w-file");
+    wz.onclick=()=>wf.click();
+    wz.ondragover=e=>{e.preventDefault();wz.classList.add("drag");};
+    wz.ondragleave=()=>wz.classList.remove("drag");
+    wz.ondrop=e=>{e.preventDefault();wz.classList.remove("drag");if(e.dataTransfer.files.length)handleWorkUpload(e.dataTransfer.files,mode);};
+    wf.onchange=()=>{ if(wf.files.length) handleWorkUpload(wf.files,mode); };
+    document.getElementById("w-aud").addEventListener("change",ev=>{ const fa=ev.target.files[0]; if(fa) audioWarnAndTranscribe(fa,fa.type,"entrevistas",null,fa.name.replace(/\.[^.]+$/,"")); });
+    return;
+  }
+
+  const tabs = WORK_TABS[mode];
+  if(!workTab || !tabs.some(t=>t.key===workTab)) workTab=tabs[0].key;
+
+  c.innerHTML=`
+  <div class="split">
+    <div class="split-left">
+      <div class="split-toolbar">
+        <button class="icon-btn" id="w-change" title="Cambiar material">⇄</button>
+        <span class="split-doc-name">${MATERIAL_TYPES[m.type].sym} ${esc(m.name)}</span>
+        <span class="tip" style="white-space:nowrap">Seleccioná texto para marcar</span>
+      </div>
+      <div class="split-body"><div class="doc-text" id="doc-text">${buildAnnotatedHtml(m)}</div></div>
+    </div>
+    <div class="split-right">
+      <div class="tool-tabs" id="tool-tabs">
+        ${tabs.map(t=>`<button class="tool-tab${workTab===t.key?" active":""}" data-tab="${t.key}">${t.title}</button>`).join("")}
+      </div>
+      <div class="tool-panel" id="tool-panel">${renderToolPanel(mode,m)}</div>
+    </div>
+  </div>`;
+
+  document.getElementById("w-change").onclick=()=>{activeMatId=null;renderWorkView(mode);};
+  const dt=document.getElementById("doc-text");
+  const onSel=()=>{ const off=getSelOffsets(dt); if(off){ pendingSel=off; const r=window.getSelection().getRangeAt(0).getBoundingClientRect(); showCtxMenu(r.left,r.bottom,mode); } };
+  dt.addEventListener("mouseup",onSel);
+  dt.addEventListener("touchend",()=>setTimeout(onSel,10));
+  dt.querySelectorAll("mark[data-ann]").forEach(mk=>mk.addEventListener("click",ev=>{ ev.stopPropagation(); hideCtxMenu(); focusedAnn=mk.dataset.ann; refreshPanel(mode,m); }));
+  dt.querySelectorAll("mark[data-ai]").forEach(mk=>mk.addEventListener("click",ev=>{ ev.stopPropagation(); pendingSel={start:+mk.dataset.s,end:+mk.dataset.e,quote:mk.textContent}; const r=mk.getBoundingClientRect(); showCtxMenu(r.left,r.bottom,mode); }));
+  document.querySelectorAll(".tool-tab").forEach(b=>b.onclick=()=>{ workTab=b.dataset.tab; focusedAnn=null; resetWorkAi(); refreshPanel(mode,m); document.querySelectorAll(".tool-tab").forEach(x=>x.classList.toggle("active",x.dataset.tab===workTab)); });
+  bindToolPanel(mode,m);
+  if(flashAnn && flashAnn.matId===m.id){
+    const mk=dt.querySelector(`mark[data-ann="${flashAnn.annId}"]`);
+    if(mk){ mk.classList.add("flash"); mk.scrollIntoView({behavior:"smooth",block:"center"}); focusedAnn=flashAnn.annId; refreshPanel(mode,m); }
+    flashAnn=null;
+  }
+}
+function resetWorkAi(){ workAiOut=""; workAiCodes=[]; workAiKind=""; workAiMarks=[]; focusedAnn=null; workLinkedMats=[]; }
+async function handleWorkUpload(files,mode){
+  let firstId=null;
+  for(const file of files){
+    try{
+      const text=await readFileText(file);
+      if(!text||!text.trim()){ showToast("No se pudo extraer texto de "+file.name); continue; }
+      const mat={id:uid("mat"),type:"notas-campo",name:file.name,text,folder:null,date:today(),anns:[]};
+      materials.push(mat); if(!firstId) firstId=mat.id;
+      showToast(`“${file.name}” cargado ✓`);
+    }catch(e){ showToast(e.message||"Error al procesar "+file.name); }
+  }
+  await persist();
+  if(firstId){ activeMatId=firstId; resetWorkAi(); }
+  renderWorkView(mode);
+}
+
+function pasteFragment(mode){
+  openModal(`<div class="modal-head"><div class="modal-title">Pegar o escribir un fragmento</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="field-row"><label class="field-label">Nombre</label><input class="field-in" id="frag-name" value="Fragmento ${today()}"/></div>
+      <div class="field-row"><label class="field-label">Texto</label><textarea class="field-ta" id="frag-text" style="min-height:30vh" placeholder="Pegá o escribí el fragmento sobre el que querés trabajar…"></textarea></div>
+      <div class="tip">Se guarda como material (en Notas de campo) y queda disponible para volver a usarlo.</div>
+    </div>
+    <div class="modal-foot"><button class="btn outline" id="m-cancel">Cancelar</button><button class="btn green" id="m-ok">Guardar y abrir</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-cancel").onclick=closeModal;
+  document.getElementById("m-ok").onclick=()=>{
+    const txt=document.getElementById("frag-text").value.trim();
+    if(!txt){ showToast("Pegá o escribí algo"); return; }
+    const mat={id:uid("mat"),type:"notas-campo",name:val("frag-name")||("Fragmento "+today()),text:txt,folder:null,date:today(),anns:[],fromPaste:true};
+    materials.push(mat); markDirty(); persist(); closeModal();
+    activeMatId=mat.id; resetWorkAi(); renderWorkView(mode);
+  };
+  setTimeout(()=>document.getElementById("frag-text")?.focus(),60);
+}
+
+// ── Panel derecho ──
+function renderToolPanel(mode,m){
+  if(focusedAnn){
+    const a=m.anns.find(x=>x.id===focusedAnn);
+    if(a){
+      const code=a.codeId?findCode(a.codeId):null;
+      return `<div class="ai-box" style="border-left:3px solid var(--green-mid)">
+        <div class="ai-box-head"><span class="ai-box-label">Fragmento marcado</span><button class="icon-btn danger" id="ann-del" title="Quitar marca">🗑</button></div>
+        <div class="frag-text" style="margin-bottom:.5rem">“${esc(a.quote)}”</div>
+        ${a.kind==="code"?`<div class="tip">Código / análisis: <span class="usercode-chip">${esc(a.label||(code&&code.code)||"")}</span></div>`:""}
+        ${a.kind==="highlight"?`<div class="tip">Resaltado libre.</div><button class="btn outline sm" id="ann-tocode" style="margin-top:.5rem">＋ Convertir en código</button>`:""}
+        <button class="btn outline sm" id="ann-close" style="margin-top:.7rem">← Volver a las herramientas</button>
+      </div>`;
+    }
+  }
+  if(mode==="codificar") return workTab==="preguntas"?panelPreguntas(m):panelCodigos(m);
+  if(workTab==="biblio") return panelVinculo(m,"biblio");
+  if(workTab==="fuentes") return panelVinculo(m,"fuentes");
+  return panelEscribir(m);
+}
+
+// Selector "especificar enfoque" (ejes de la IA como desplegable)
+function enfoqueSelector(mode){
+  const list=ENFOQUES[mode];
+  const cur=list.find(e=>e.key===workEnfoque);
+  return `<details class="enfoque-box"><summary>✦ Especificar enfoque${cur?`: <strong>${esc(cur.t)}</strong>`:" (general)"}</summary>
+    <div class="enfoque-opts">
+      <button class="enf-opt${!workEnfoque?" active":""}" data-enf="">General</button>
+      ${list.map(e=>`<button class="enf-opt${workEnfoque===e.key?" active":""}" data-enf="${e.key}">${e.t}</button>`).join("")}
+    </div></details>`;
+}
+// Vincular material como insumo IA (cualquier material salvo el activo)
+function renderLinkMatsControl(){
+  const others=materials.filter(x=>x.id!==activeMatId);
+  if(!others.length) return "";
+  return `<details style="margin:.5rem 0"><summary class="tip" style="cursor:pointer">⛓ Vincular otro material como insumo IA (${workLinkedMats.length} seleccionado/s)</summary>
+    <div style="margin-top:.4rem;max-height:160px;overflow:auto">${others.map(b=>`<label class="link-mat-row"><input type="checkbox" class="linkmat" value="${b.id}" ${workLinkedMats.includes(b.id)?"checked":""}/> ${MATERIAL_TYPES[b.type].sym} ${esc(b.name)}</label>`).join("")}</div>
+    <div class="tip" style="margin-top:.3rem">Solo lo que tildes se envía a la IA (cuida tu cuota).</div></details>`;
+}
+// Caja de salida IA (completa, con scroll propio) + acciones de guardado
+function aiOutBox(mode,m){
+  if(workAiLoading && !workAiOut) return `<div class="ai-box"><div class="ai-box-label">Sugerencias IA</div><div class="ai-out"><span class="cursor-blink"></span></div></div>`;
+  if(!workAiOut) return "";
+  const chips = (workAiKind==="codigos" && workAiCodes.length)
+    ? `<div style="margin-top:.6rem"><div class="tip" style="margin-bottom:.3rem">Códigos sugeridos (clic para marcarlos en el texto y sumarlos a tu vocabulario):</div>${workAiCodes.map(t=>`<button class="ai-sugg-code asc" data-term="${esc(t)}">${esc(t)} <span>＋</span></button>`).join("")}</div>`
+    : "";
+  return `<div class="ai-box">
+    <div class="ai-box-head"><span class="ai-box-label">Sugerencias IA</span></div>
+    <div class="ai-out">${renderMd(workAiOut)}${workAiLoading?'<span class="cursor-blink"></span>':''}</div>
+    ${chips}
+    ${!workAiLoading?`<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem">
+      <button class="btn outline sm" id="ai-save-rec">＋ Guardar en recomendaciones</button>
+      ${mode==="analizar"?`<button class="btn outline sm" id="ai-save-ana">＋ Guardar como análisis</button>`:""}
+    </div>`:""}
+  </div>`;
+}
+function aiRunBtn(label){ return `<button class="btn ${aiEnabled()?"green":"outline"} sm" id="run-ai" ${!aiEnabled()?"disabled":""}>${workAiLoading?'<span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span> Pensando…':label}</button>`; }
+function noAiHint(){ return aiEnabled()?"":`<div class="tip" style="margin-top:.3rem">La IA está desactivada: podés trabajar a mano igual. Activá la IA (arriba) para las sugerencias.</div>`; }
+
+// CODIFICAR · A) Generar códigos
+function panelCodigos(m){
+  const codes=savedCodes.slice();
+  const usedHere=new Set((m.anns||[]).filter(a=>a.kind==="code").map(a=>a.codeId));
+  return `
+    <div class="panel-sec-title">Generar códigos</div>
+    <div class="panel-sec-desc">Creá códigos, aplicalos al texto y mirá los que ya usaste. Para codificar un fragmento, seleccionalo en el texto y elegí «Guardar como código».</div>
+    <div class="field-row"><label class="field-label">Escribir un código nuevo</label>
+      <div style="display:flex;gap:.4rem"><input class="field-in" id="new-code" placeholder="Ej: cuidado, frontera, espera…"/><button class="btn green sm" id="add-code">Guardar</button></div>
+      <div class="tip" style="margin-top:.3rem">Se suma a tu vocabulario. Para vincularlo a un fragmento, seleccioná texto y elegí «Vincular a código preexistente».</div>
+    </div>
+    <div style="margin-top:.8rem">
+      <label class="field-label">Códigos ya utilizados ${codes.length?`(${codes.length})`:""}</label>
+      ${codes.length?`<div class="hscroll">${codes.map(c=>{const st=codeStats(c.id);return `<button class="codelist-item capply" data-id="${c.id}" title="${usedHere.has(c.id)?"usado en este material":""}">${esc(c.code)} <span style="opacity:.6">·${st.freq}</span></button>`;}).join("")}</div>
+      <div class="tip" style="margin-top:.3rem">Clic en un código: si tenés texto seleccionado, lo vincula; si no, te avisa.</div>`:'<div class="tip">Todavía no hay códigos.</div>'}
+    </div>
+    <hr class="s-div" style="border-color:var(--border)">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">${aiRunBtn("✦ Sugerir códigos con IA")}</div>
+    ${enfoqueSelector("codificar")}
+    ${renderLinkMatsControl()}
+    ${aiOutBox("codificar",m)}
+    ${noAiHint()}`;
+}
+// CODIFICAR · B) Pensar preguntas
+function panelPreguntas(m){
+  const recs=recomendaciones.slice().reverse();
+  const anas=savedAnalyses.slice().reverse();
+  return `
+    <div class="panel-sec-title">Pensar preguntas</div>
+    <div class="panel-sec-desc">Escribí interrogantes, recuperá recomendaciones y análisis previos, y pedí ayuda a la IA con un enfoque.</div>
+    <div class="field-row"><label class="field-label">Tus preguntas / interrogantes</label>
+      <textarea class="field-ta" id="work-write-ta" placeholder="¿Qué te deja pensando este material?"></textarea>
+      <button class="btn green sm" id="save-pregunta" style="margin-top:.4rem">Guardar en recomendaciones</button>
+    </div>
+    <div style="margin-top:.6rem">
+      <label class="field-label">Recomendaciones y análisis previos</label>
+      ${(recs.length||anas.length)?`<div class="hscroll">
+        ${recs.map(r=>`<button class="codelist-item rec-insert" data-body="${esc(r.body||r.title||"")}" title="${esc(r.matName||"")}">◌ ${esc((r.title||r.body||"").slice(0,28))}</button>`).join("")}
+        ${anas.map(a=>`<button class="codelist-item rec-insert" data-body="${esc(a.body||a.title||"")}" title="${esc(a.matName||"")}">◉ ${esc((a.title||"").slice(0,28))}</button>`).join("")}
+      </div><div class="tip" style="margin-top:.3rem">Clic para insertar en tu texto de arriba.</div>`:'<div class="tip">Todavía no hay recomendaciones ni análisis guardados.</div>'}
+    </div>
+    <hr class="s-div" style="border-color:var(--border)">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">${aiRunBtn("✦ Ayuda de la IA")}</div>
+    ${enfoqueSelector("codificar")}
+    ${renderLinkMatsControl()}
+    ${aiOutBox("codificar",m)}
+    ${noAiHint()}`;
+}
+// ANALIZAR · 1) Escribir análisis
+function panelEscribir(m){
+  return `
+    <div class="panel-sec-title">Escribir análisis</div>
+    <div class="panel-sec-desc">Escribí tu análisis (vinculado a un fragmento o general). La IA puede acompañar con el enfoque que elijas.</div>
+    <div class="field-row"><label class="field-label">Tu escritura${pendingSel?' <span class="intro-aitag">fragmento vinculado</span>':''}</label>
+      <textarea class="field-ta" id="work-write-ta" style="min-height:130px" placeholder="Escribí tu análisis…"></textarea>
+      <button class="btn green sm" id="save-analisis" style="margin-top:.4rem">Guardar como análisis</button>
+    </div>
+    <hr class="s-div" style="border-color:var(--border)">
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">${aiRunBtn("✦ Sugerencias de la IA")}</div>
+    ${enfoqueSelector("analizar")}
+    ${renderLinkMatsControl()}
+    ${aiOutBox("analizar",m)}
+    ${noAiHint()}`;
+}
+// ANALIZAR · 2) Vínculo con bibliografía / 3) Vínculo con otras fuentes
+function panelVinculo(m,which){
+  const isBiblio = which==="biblio";
+  const pool = isBiblio ? matsOfType("documentos") : materials.filter(x=>x.id!==m.id && (x.type==="entrevistas"||x.type==="notas-campo"));
+  const title = isBiblio ? "Vínculo con la bibliografía" : "Vínculo con otras fuentes";
+  const desc = isBiblio ? "Elegí materiales bibliográficos para que la IA relacione este texto con ellos." : "Elegí otras entrevistas o notas para relacionarlas. Se recuperan sus códigos, análisis y recomendaciones.";
+  // recuperar códigos/análisis/recomendaciones de las fuentes seleccionadas
+  let recovered="";
+  if(!isBiblio && workLinkedMats.length){
+    const ids=new Set(workLinkedMats);
+    const cods=savedCodes.filter(c=>materials.some(mm=>ids.has(mm.id)&&(mm.anns||[]).some(a=>a.codeId===c.id)));
+    const anas=savedAnalyses.filter(a=>ids.has(a.matId));
+    const recs=recomendaciones.filter(r=>ids.has(r.matId));
+    recovered=`<div class="card" style="margin:.5rem 0">
+      <div class="ai-box-label" style="margin-bottom:.3rem">Recuperado de las fuentes elegidas</div>
+      <div class="tip">Códigos: ${cods.length?cods.map(c=>`<span class="usercode-chip">${esc(c.code)}</span>`).join(""):"—"}</div>
+      <div class="tip" style="margin-top:.3rem">Análisis: ${anas.length} · Recomendaciones: ${recs.length}</div>
+    </div>`;
+  }
+  const poolHtml = pool.length
+    ? `<div style="max-height:170px;overflow:auto;margin:.4rem 0">${pool.map(b=>`<label class="link-mat-row"><input type="checkbox" class="linkmat" value="${b.id}" ${workLinkedMats.includes(b.id)?"checked":""}/> ${MATERIAL_TYPES[b.type].sym} ${esc(b.name)}</label>`).join("")}</div>`
+    : `<div class="tip">No hay ${isBiblio?"bibliografía cargada":"otras fuentes"} todavía.</div>`;
+  return `
+    <div class="panel-sec-title">${title}</div>
+    <div class="panel-sec-desc">${desc}</div>
+    ${poolHtml}
+    ${recovered}
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">${aiRunBtn(isBiblio?"✦ Relacionar con la bibliografía":"✦ Relacionar con las fuentes")}</div>
+    ${aiOutBox("analizar",m)}
+    ${noAiHint()}`;
+}
+
+function bindToolPanel(mode,m){
+  document.getElementById("run-ai")?.addEventListener("click",()=>runWorkAI(mode,m));
+  document.getElementById("ann-del")?.addEventListener("click",()=>{ m.anns=m.anns.filter(x=>x.id!==focusedAnn); focusedAnn=null; markDirty(); persist(); renderWorkView(mode); });
+  document.getElementById("ann-close")?.addEventListener("click",()=>{ focusedAnn=null; refreshPanel(mode,m); });
+  document.getElementById("ann-tocode")?.addEventListener("click",()=>{ const a=m.anns.find(x=>x.id===focusedAnn); if(!a)return; pendingSel={quote:a.quote,start:a.start,end:a.end}; m.anns=m.anns.filter(x=>x.id!==focusedAnn); focusedAnn=null; promptCodeName(mode,(name)=>attachCode(m,name,pendingSel,mode)); });
+  // enfoque
+  document.querySelectorAll(".enf-opt").forEach(b=>b.addEventListener("click",()=>{ workEnfoque=b.dataset.enf||""; refreshPanel(mode,m); }));
+  // vincular materiales
+  document.querySelectorAll(".linkmat").forEach(cb=>cb.addEventListener("change",()=>{ workLinkedMats=[...document.querySelectorAll(".linkmat:checked")].map(x=>x.value); refreshPanel(mode,m); }));
+  // marcar términos sugeridos + sumar a vocabulario
+  document.querySelectorAll(".asc").forEach(b=>b.addEventListener("click",()=>{
+    const term=b.dataset.term;
+    if(!findCode(term)){ savedCodes.push({id:uid("cod"),code:term,date:today()}); markDirty(); persist(); }
+    const occ=termOccurrences(m.text,term,3);
+    if(occ.length){ workAiMarks=workAiMarks.concat(occ); renderWorkView(mode); }
+    showToast(`“${term}” agregado al vocabulario${occ.length?" y marcado":""} ✓`);
+  }));
+  // aplicar código existente al fragmento seleccionado
+  document.querySelectorAll(".capply").forEach(b=>b.addEventListener("click",()=>{
+    const code=savedCodes.find(c=>c.id===b.dataset.id); if(!code) return;
+    if(pendingSel){ attachCode(m,code.code,pendingSel,mode,code.id); }
+    else showToast("Seleccioná texto en el documento para vincularlo a este código.");
+  }));
+  // nuevo código al vocabulario
+  document.getElementById("add-code")?.addEventListener("click",()=>{
+    const n=val("new-code"); if(!n){ showToast("Escribí el código"); return; }
+    if(findCode(n)){ showToast("Ese código ya existe"); return; }
+    savedCodes.push({id:uid("cod"),code:n,date:today()}); markDirty(); persist(); showToast(`Código “${n}” creado ✓`); refreshPanel(mode,m);
+  });
+  // insertar recomendación/análisis previo en el textarea
+  document.querySelectorAll(".rec-insert").forEach(b=>b.addEventListener("click",()=>{
+    const ta=document.getElementById("work-write-ta"); if(!ta) return;
+    ta.value=(ta.value?ta.value+"\n\n":"")+b.dataset.body; ta.focus();
+  }));
+  // guardar pregunta (recomendación) / análisis
+  document.getElementById("save-pregunta")?.addEventListener("click",()=>{
+    const ta=document.getElementById("work-write-ta"); const body=(ta?.value||"").trim();
+    if(!body){ showToast("Escribí algo antes de guardar"); return; }
+    saveRecomendacion("pregunta", body.slice(0,60), body, m, pendingSel?pendingSel.quote:"", "usuario");
+    if(ta) ta.value=""; pendingSel=null; refreshPanel(mode,m);
+  });
+  document.getElementById("save-analisis")?.addEventListener("click",()=>{
+    const ta=document.getElementById("work-write-ta"); const body=(ta?.value||"").trim();
+    if(!body){ showToast("Escribí algo antes de guardar"); return; }
+    savedAnalyses.push({id:uid("ana"),title:body.slice(0,50),body,matId:m.id,matName:m.name,quote:pendingSel?pendingSel.quote:"",codes:[],section:workEnfoque||"general",mode,date:today()});
+    markDirty(); persist(); showToast("Análisis guardado ✓"); if(ta) ta.value=""; pendingSel=null; refreshPanel(mode,m);
+  });
+  // guardar salida IA
+  document.getElementById("ai-save-rec")?.addEventListener("click",()=>{ openSaveDestino(workAiOut,m,pendingSel?pendingSel.quote:"","ia"); });
+  document.getElementById("ai-save-ana")?.addEventListener("click",()=>{ savedAnalyses.push({id:uid("ana"),title:(workAiKind||"Análisis IA"),body:workAiOut,matId:m.id,matName:m.name,quote:pendingSel?pendingSel.quote:"",codes:[],section:workEnfoque||"general",mode,date:today(),source:"ia"}); markDirty(); persist(); showToast("Guardado como análisis ✓"); });
+}
+
+// Guardar en recomendaciones (eligiendo destino: código / análisis / recomendación)
+function saveRecomendacion(kind,title,body,m,quote,source){
+  recomendaciones.push({id:uid("rec"),kind,title:title||body.slice(0,50),body,matId:m?m.id:null,matName:m?m.name:"",quote:quote||"",source:source||"usuario",date:today()});
+  markDirty(); persist(); showToast("Guardado en recomendaciones ✓");
+}
+function openSaveDestino(prefill,m,quote,source){
+  openModal(`<div class="modal-head"><div class="modal-title">Guardar en recomendaciones</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="field-row"><label class="field-label">Tipo</label>
+        <select class="field-sel" id="sd-kind"><option value="recomendacion">Recomendación general</option><option value="pregunta">Pregunta / interrogante</option><option value="sugerencia">Sugerencia</option></select></div>
+      <div class="field-row"><label class="field-label">Nombre</label><input class="field-in" id="sd-title" placeholder="Un título breve que la englobe"/></div>
+      <div class="field-row"><label class="field-label">Contenido</label><textarea class="field-ta" id="sd-body" style="min-height:140px">${esc(prefill||"")}</textarea></div>
+      ${quote?`<div class="tip">Queda vinculada al fragmento: “${esc(quote.slice(0,90))}${quote.length>90?"…":""}”</div>`:""}
+    </div>
+    <div class="modal-foot"><button class="btn outline" id="m-cancel">Cancelar</button><button class="btn green" id="m-ok">Guardar</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-cancel").onclick=closeModal;
+  document.getElementById("m-ok").onclick=()=>{
+    const kind=document.getElementById("sd-kind").value;
+    const title=val("sd-title"); const body=document.getElementById("sd-body").value.trim();
+    if(!body){ showToast("El contenido no puede estar vacío"); return; }
+    saveRecomendacion(kind,title,body,m,quote,source); closeModal();
+  };
+  setTimeout(()=>document.getElementById("sd-title")?.focus(),50);
+}
+
+async function runWorkAI(mode,m){
+  if(!aiEnabled()){ showToast("Activá la IA para generar sugerencias."); return; }
+  workAiLoading=true; workAiOut=""; workAiCodes=[];
+  refreshPanel(mode,m);
+  const enf = ENFOQUES[mode].find(e=>e.key===workEnfoque);
+  const enfTxt = enf ? `\nEnfocate especialmente en esta dimensión: «${enf.t}».` : "";
+  const frag = pendingSel ? `\n\nFragmento que está mirando ahora (centrate en él):\n"${pendingSel.quote}"` : "";
+  let task="", label="";
+  if(mode==="codificar" && workTab==="codigos"){ workAiKind="codigos"; label="codigos";
+    task=`Proponé códigos analíticos para este material. Devolvé una lista breve (viñetas «- »), cada código una palabra o frase corta, pertinente al marco del proyecto. No repitas los códigos ya creados.`;
+  } else if(mode==="codificar"){ workAiKind="preguntas"; label="preguntas";
+    task=`Ayudá a pensar la codificación: proponé interrogantes y posibles entradas analíticas para este material, en viñetas breves.`;
+  } else if(mode==="analizar" && workTab==="escribir"){ workAiKind="analisis"; label="analisis";
+    task=`Acompañá el análisis de este material con aperturas (no reemplaces la escritura de quien investiga): observaciones, tensiones y preguntas, en prosa breve y viñetas.`;
+  } else if(mode==="analizar" && workTab==="biblio"){ workAiKind="biblio"; label="biblio";
+    task=`Relacioná este material con la bibliografía vinculada: qué conceptos o discusiones de esos textos iluminan el material, y dónde hay tensión. Citá de qué texto sale cada idea.`;
+  } else { workAiKind="fuentes"; label="fuentes";
+    task=`Relacioná este material con las otras fuentes vinculadas (entrevistas/notas): resonancias, contrastes y patrones compartidos, retomando sus códigos y análisis si ayudan.`;
+  }
+  const system = `Sos un colega de investigación cualitativa acompañando ${mode==="codificar"?"la codificación":"el análisis"} etnográfico. ${NO_FILLER}${enfTxt}${projectContext()}${priorWorkContext()}${linkedMaterialsContext()}`;
+  const userText = `${task}${frag}\n\nMaterial (${m.name}):\n\n${(m.text||"").slice(0,9000)}`;
+  try{
+    let acc="";
+    await streamGemini(system,userText,(ch)=>{ acc+=ch; workAiOut=acc; const box=document.querySelector(".ai-out"); if(box) box.innerHTML=renderMd(acc)+'<span class="cursor-blink"></span>'; },{maxTokens:3200,temperature:0.8});
+    workAiOut=acc;
+    if(workAiKind==="codigos"){
+      workAiCodes=acc.split("\n").filter(l=>/^\s*[-•*]/.test(l)).map(l=>l.replace(/^\s*[-•*]\s*/,"").replace(/\*\*/g,"").replace(/[:：].*$/,"").trim()).filter(x=>x&&x.length<60);
+      workAiCodes=[...new Set(workAiCodes)].slice(0,10);
+    }
+    history=[{mode,label,date:today(),input:m.name,output:acc},...history].slice(0,12); persist();
+  }catch(e){ const d=e._diag||{title:"⚠ Error",detail:String(e)}; workAiOut=""; showToast(d.title); }
+  workAiLoading=false; refreshPanel(mode,m);
+}
+
+function parseAiSections(text,SECTIONS){
+  const res={};
+  const norm=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/g,"").trim();
+  const lines=text.split("\n"); let curKey=null,buf=[];
+  const titleToKey=t=>{ const up=norm(t); const s=SECTIONS.find(x=>up.includes(norm(x.title))||norm(x.title).includes(up)); return s?s.key:null; };
+  const flush=()=>{ if(curKey) res[curKey]=buf.join("\n").trim(); buf=[]; };
+  for(const l of lines){
+    const hm=l.match(/^#{1,4}\s*(.+)$/) || l.match(/^\*\*(.+?)\*\*:?\s*$/);
+    if(hm){ const k=titleToKey(hm[1]); if(k){ flush(); curKey=k; continue; } }
+    if(curKey) buf.push(l);
+  }
+  flush();
+  return res;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NUBE — cuadro conceptual de códigos (req 4)
+// ═══════════════════════════════════════════════════════════════════════════
+let flashAnn = null; // {matId,annId} para resaltar al saltar desde un fragmento
+function allCodeAnns(){
+  const out=[];
+  materials.forEach(m=>(m.anns||[]).forEach(a=>{ if(a.kind==="code") out.push({ann:a,mat:m}); }));
+  return out;
+}
+function codeStats(codeId){
+  const occ=allCodeAnns().filter(o=>o.ann.codeId===codeId);
+  const origins=[...new Set(occ.map(o=>o.mat.name))];
+  return {freq:occ.length,origins,occ};
+}
+function renderNubeView(){
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:"Nube"}]);
+  const c=document.getElementById("content");
+  const tabs=[["codigos","Códigos"],["analisis","Análisis"],["recomendaciones","Recomendaciones"],["vinculos","Vínculos"]];
+  if(!tabs.some(t=>t[0]===nubeTab)) nubeTab="codigos";
+  let inner="";
+  if(nubeTab==="codigos") inner=nubeCodigos();
+  else if(nubeTab==="analisis") inner=nubeAnalisis();
+  else if(nubeTab==="recomendaciones") inner=nubeRecomendaciones();
+  else inner=nubeVinculos();
+  c.innerHTML=`<div class="wrap">
+    <div class="page-head"><div class="page-title"><span style="color:#7B5EA7">◆</span> Nube del proyecto</div>
+      <div class="page-sub">Tus códigos, análisis y recomendaciones, y los vínculos entre ellos. Es insumo directo para seguir codificando y analizando.</div></div>
+    <div class="nube-tabs">${tabs.map(([k,l])=>`<button class="nube-tab${nubeTab===k?" active":""}" data-t="${k}">${l}</button>`).join("")}</div>
+    ${inner}
+  </div>`;
+  c.querySelectorAll(".nube-tab").forEach(b=>b.onclick=()=>{nubeTab=b.dataset.t;render();});
+  c.querySelectorAll(".code-row-head").forEach(h=>h.onclick=()=>{ const id=h.closest(".code-row").dataset.id; nubeOpenCode = nubeOpenCode===id?null:id; render(); });
+  c.querySelectorAll(".gotomat").forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); const matId=b.dataset.mat; const mt=materials.find(x=>x.id===matId); if(!mt) return; flashAnn=b.dataset.ann?{matId,annId:b.dataset.ann}:null; activeMatId=matId; go(mt.type==="documentos"?"analizar":"codificar",{matId}); });
+  c.querySelectorAll(".ana-card").forEach(el=>el.onclick=()=>openAnalysisView(el.dataset.id));
+  c.querySelectorAll(".rec-card").forEach(el=>el.onclick=()=>openRecView(el.dataset.id));
+  c.querySelectorAll(".concept-node").forEach(n=>n.onclick=()=>go("code-detail",n.dataset.id));
+}
+function nubeCodigos(){
+  if(!savedCodes.length) return `<div class="empty-state"><div class="empty-sigil">◈</div><div class="empty-text">Todavía no hay códigos.<br>Creá códigos marcando fragmentos en Codificar.</div></div>`;
+  const rows=savedCodes.map(c=>({c,...codeStats(c.id)})).sort((a,b)=>b.freq-a.freq);
+  return `<div class="tip" style="margin-bottom:.6rem">${rows.length} código(s). Tocá uno para ver dónde aparece; tocá un material para ir directo.</div>
+  ${rows.map(({c,freq,occ})=>{
+    const open=nubeOpenCode===c.id;
+    return `<div class="code-row${open?" open":""}" data-id="${c.id}">
+      <div class="code-row-head"><span class="concept-node-freq">${freq}</span><span class="code-row-name">${esc(c.code)}</span><span class="code-row-caret">${open?"▾":"▸"}</span></div>
+      ${open?`<div class="code-row-body">${occ.length?occ.map(o=>`<button class="gotomat" data-mat="${o.mat.id}" data-ann="${o.ann.id}">${MATERIAL_TYPES[o.mat.type].sym} ${esc(o.mat.name)} <span style="opacity:.7">— “${esc(o.ann.quote.slice(0,70))}${o.ann.quote.length>70?"…":""}”</span></button>`).join(""):'<div class="tip" style="padding:.4rem">Este código todavía no tiene fragmentos marcados.</div>'}</div>`:""}
+    </div>`;
+  }).join("")}`;
+}
+function nubeAnalisis(){
+  if(!savedAnalyses.length) return `<div class="empty-state"><div class="empty-sigil">◉</div><div class="empty-text">Todavía no guardaste análisis.<br>Escribí y guardá desde Analizar o Codificar.</div></div>`;
+  return `<div class="tip" style="margin-bottom:.6rem">${savedAnalyses.length} análisis. Tocá uno para verlo o editarlo.</div>
+  <div class="mat-list">${savedAnalyses.slice().reverse().map(a=>`
+    <div class="mat-item ana-card" data-id="${a.id}" style="cursor:pointer">
+      <span class="mat-sym" style="color:${a.mode==="codificar"?"#2D6A4F":"#1E3A2F"}">${a.mode==="codificar"?"◈":"◉"}</span>
+      <div class="mat-info"><div class="mat-name">${esc(a.title||"Análisis")}</div>
+        <div class="mat-meta">${esc(a.matName||"")} · ${a.date||""}${a.source==="ia"?" · IA":""}</div>
+        <div class="frag-text" style="font-size:.82rem;margin-top:.3rem;color:var(--text2)">${esc((a.body||"").slice(0,160))}${(a.body||"").length>160?"…":""}</div></div>
+    </div>`).join("")}</div>`;
+}
+function nubeRecomendaciones(){
+  if(!recomendaciones.length) return `<div class="empty-state"><div class="empty-sigil">◌</div><div class="empty-text">Todavía no hay recomendaciones ni preguntas guardadas.<br>Guardalas desde Codificar o Analizar con «Guardar en recomendaciones».</div></div>`;
+  const sym={pregunta:"❓",recomendacion:"◌",sugerencia:"✦"};
+  return `<div class="tip" style="margin-bottom:.6rem">${recomendaciones.length} guardada(s). Insumo para volver al texto y para la IA.</div>
+  <div class="mat-list">${recomendaciones.slice().reverse().map(r=>`
+    <div class="mat-item rec-card" data-id="${r.id}" style="cursor:pointer">
+      <span class="mat-sym" style="color:#7B5EA7">${sym[r.kind]||"◌"}</span>
+      <div class="mat-info"><div class="mat-name">${esc(r.title||"(sin título)")} <span class="intro-aitag">${esc(r.kind)}</span>${r.source==="ia"?' <span class="intro-aitag">IA</span>':""}</div>
+        <div class="mat-meta">${esc(r.matName||"general")} · ${r.date||""}</div>
+        <div class="frag-text" style="font-size:.82rem;margin-top:.3rem;color:var(--text2)">${esc((r.body||"").slice(0,150))}${(r.body||"").length>150?"…":""}</div>
+        ${r.quote?`<div class="frag-note">vinculada a: “${esc(r.quote.slice(0,80))}${r.quote.length>80?"…":""}”</div>`:""}</div>
+    </div>`).join("")}</div>`;
+}
+function nubeVinculos(){
+  let map="";
+  if(!savedCodes.length){ map=`<div class="empty-state"><div class="empty-sigil">◆</div><div class="empty-text">El mapa aparece cuando tengas códigos.</div></div>`; }
+  else {
+    const withStats=savedCodes.map(c=>({c,...codeStats(c.id)})).sort((a,b)=>b.freq-a.freq);
+    const maxF=Math.max(1,...withStats.map(x=>x.freq));
+    map=`<div class="concept-map">${withStats.map(({c,freq,origins})=>{
+      const scale=1+(freq/maxF)*0.6;
+      return `<div class="concept-node" data-id="${c.id}" style="border-left-width:${2+Math.round((freq/maxF)*6)}px">
+        <div class="concept-node-name" style="font-size:${(0.96*scale).toFixed(2)}rem">${esc(c.code)}</div>
+        <div class="concept-node-meta"><span class="concept-node-freq">${freq}</span><span>${origins.length} origen${origins.length!==1?"es":""}</span></div>
+        ${origins.length?`<div class="concept-node-origins">${origins.slice(0,3).map(esc).join(" · ")}${origins.length>3?` +${origins.length-3}`:""}</div>`:'<div class="concept-node-origins" style="opacity:.6">sin fragmentos aún</div>'}
+      </div>`;
+    }).join("")}</div>`;
+  }
+  // co-ocurrencias
+  const codeMats={}; allCodeAnns().forEach(o=>{ (codeMats[o.ann.codeId]=codeMats[o.ann.codeId]||new Set()).add(o.mat.id); });
+  const ids=Object.keys(codeMats); const pairs=[];
+  for(let i=0;i<ids.length;i++) for(let j=i+1;j<ids.length;j++){ const shared=[...codeMats[ids[i]]].filter(x=>codeMats[ids[j]].has(x)); if(shared.length) pairs.push({a:ids[i],b:ids[j],n:shared.length}); }
+  pairs.sort((x,y)=>y.n-x.n);
+  const nm=id=>{const c=findCode(id);return c?c.code:"?";};
+  const links = pairs.length?`<div class="home-section-label">Códigos que coinciden en los mismos materiales</div>
+    <div class="card">${pairs.slice(0,30).map(p=>`<div style="display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px dashed var(--border)">
+      <span class="usercode-chip">${esc(nm(p.a))}</span><span class="crumb-sep">—</span><span class="usercode-chip">${esc(nm(p.b))}</span>
+      <span class="mat-meta" style="margin-left:auto">${p.n} en común</span></div>`).join("")}</div>`:"";
+  return `<div class="tip" style="margin-bottom:.8rem">Mapa de tus códigos: tamaño y borde según frecuencia. Tocá uno para ver todos sus fragmentos.</div>${map}${links}`;
+}
+function openRecView(id){
+  const r=recomendaciones.find(x=>x.id===id); if(!r) return;
+  openModal(`<div class="modal-head"><div class="modal-title">${esc(r.title||"Recomendación")} <em>· ${esc(r.kind)}</em></div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="mat-meta" style="margin-bottom:.5rem">${esc(r.matName||"general")} · ${r.date||""}${r.source==="ia"?" · IA":""}</div>
+      ${r.quote?`<div class="frag-text" style="font-style:italic;border-left:3px solid var(--purple);padding-left:.7rem;margin-bottom:.7rem">“${esc(r.quote)}”</div>`:""}
+      <div class="field-row"><textarea class="field-ta" id="rv-body" style="min-height:26vh">${esc(r.body)}</textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn danger" id="rv-del">Eliminar</button><button class="btn green" id="rv-save">Guardar cambios</button></div>`);
+  document.getElementById("m-close").onclick=closeModal;
+  document.getElementById("rv-save").onclick=()=>{ r.body=document.getElementById("rv-body").value; markDirty(); persist(); closeModal(); showToast("Actualizado ✓"); render(); };
+  document.getElementById("rv-del").onclick=()=>{ closeModal(); confirmModal("¿Eliminar recomendación?","No se puede deshacer.",()=>{ recomendaciones=recomendaciones.filter(x=>x.id!==id); markDirty(); persist(); render(); },true); };
+}
+
+function openAnalysisView(id){
+  const a=savedAnalyses.find(x=>x.id===id); if(!a) return;
+  openModal(`<div class="modal-head"><div class="modal-title">${esc(a.title)}</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="mat-meta" style="margin-bottom:.5rem">${esc(a.matName||"")} · ${a.date||""} · ${a.mode}</div>
+      ${a.quote?`<div class="frag-text" style="font-style:italic;border-left:3px solid var(--green-mid);padding-left:.7rem;margin-bottom:.7rem">“${esc(a.quote)}”</div>`:""}
+      <div class="field-row"><textarea class="field-ta" id="av-body" style="min-height:30vh">${esc(a.body)}</textarea></div>
+    </div>
+    <div class="modal-foot"><button class="btn danger" id="av-del">Eliminar</button><button class="btn green" id="av-save">Guardar cambios</button></div>`);
+  document.getElementById("m-close").onclick=closeModal;
+  document.getElementById("av-save").onclick=()=>{ a.body=document.getElementById("av-body").value; markDirty(); persist(); closeModal(); showToast("Actualizado ✓"); render(); };
+  document.getElementById("av-del").onclick=()=>{ closeModal(); confirmModal("¿Eliminar análisis?","No se puede deshacer.",()=>{ savedAnalyses=savedAnalyses.filter(x=>x.id!==id); markDirty(); persist(); render(); },true); };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TRABAJO EN PROFUNDIDAD — exploración integrada
+// ═══════════════════════════════════════════════════════════════════════════
+function deepWorkContext(){
+  if(!deepSelected.length) return "";
+  const ids=new Set(deepSelected);
+  const names=materials.filter(m=>ids.has(m.id)).map(m=>m.name);
+  const cods=savedCodes.filter(c=>materials.some(m=>ids.has(m.id)&&(m.anns||[]).some(a=>a.codeId===c.id))).map(c=>c.code);
+  const anas=savedAnalyses.filter(a=>ids.has(a.matId)).slice(-6).map(a=>a.title);
+  const recs=recomendaciones.filter(r=>ids.has(r.matId)).slice(-6).map(r=>r.title);
+  let c="\n\n— TRABAJO EN PROFUNDIDAD (foco actual de quien investiga; priorizá esto) —\n";
+  c+="Materiales: "+names.join(", ")+"\n";
+  if(cods.length) c+="Códigos: "+cods.join(", ")+"\n";
+  if(anas.length) c+="Análisis: "+anas.join("; ")+"\n";
+  if(recs.length) c+="Recomendaciones: "+recs.join("; ")+"\n";
+  return c;
+}
+function renderProfundidadView(){
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:"Trabajo en profundidad"}]);
+  const c=document.getElementById("content");
+  const all=materials.filter(x=>WORK_TYPES.includes(x.type));
+  const ids=new Set(deepSelected);
+  const selMats=all.filter(m=>ids.has(m.id));
+  // datos integrados
+  const cods=savedCodes.filter(co=>selMats.some(m=>(m.anns||[]).some(a=>a.codeId===co.id)));
+  const anas=savedAnalyses.filter(a=>ids.has(a.matId));
+  const recs=recomendaciones.filter(r=>ids.has(r.matId));
+  // recomendaciones de OTROS trabajos que comparten algún código
+  const selCodeIds=new Set(cods.map(c=>c.id));
+  const otherRecs=recomendaciones.filter(r=>!ids.has(r.matId) && r.matId && materials.some(m=>m.id===r.matId && (m.anns||[]).some(a=>selCodeIds.has(a.codeId))));
+  // coincidencias: códigos presentes en 2+ materiales seleccionados
+  const coincid=cods.filter(co=>selMats.filter(m=>(m.anns||[]).some(a=>a.codeId===co.id)).length>=2);
+
+  const chooser=`<div class="card" style="margin-bottom:1rem">
+    <div class="field-label" style="margin-bottom:.4rem">Elegí uno o más trabajos para explorar</div>
+    ${all.length?`<div style="max-height:180px;overflow:auto">${all.map(m=>`<label class="link-mat-row"><input type="checkbox" class="deep-cb" value="${m.id}" ${ids.has(m.id)?"checked":""}/> ${MATERIAL_TYPES[m.type].sym} ${esc(m.name)}</label>`).join("")}</div>`:'<div class="tip">No hay materiales todavía.</div>'}
+  </div>`;
+
+  let body="";
+  if(!selMats.length){
+    body=`<div class="empty-state"><div class="empty-sigil">❖</div><div class="empty-text">Elegí trabajos arriba para ver de forma integrada<br>sus códigos, análisis y recomendaciones.</div></div>`;
+  } else {
+    const codChips = cods.length?cods.map(co=>`<button class="codelist-item deep-code" data-id="${co.id}">${esc(co.code)} <span style="opacity:.6">·${codeStats(co.id).freq}</span></button>`).join(""):'<span class="tip">—</span>';
+    const coincidChips = coincid.length?coincid.map(co=>`<button class="codelist-item deep-code" data-id="${co.id}" style="border-color:var(--amber);color:var(--amber)">${esc(co.code)}</button>`).join(""):'<span class="tip">Sin códigos compartidos entre los trabajos elegidos.</span>';
+    body=`
+      <div class="home-section-label">Códigos vinculados</div><div class="codelist">${codChips}</div>
+      <div class="home-section-label">Coincidencias (códigos en varios de estos trabajos)</div><div class="codelist">${coincidChips}</div>
+      <div class="home-section-label">Análisis vinculados (${anas.length})</div>
+      ${anas.length?`<div class="mat-list">${anas.slice().reverse().map(a=>`<div class="mat-item deep-ana" data-id="${a.id}" style="cursor:pointer"><span class="mat-sym" style="color:#1E3A2F">◉</span><div class="mat-info"><div class="mat-name">${esc(a.title||"Análisis")}</div><div class="mat-meta">${esc(a.matName||"")}</div></div></div>`).join("")}</div>`:'<div class="tip">—</div>'}
+      <div class="home-section-label">Recomendaciones vinculadas (${recs.length})</div>
+      ${recs.length?`<div class="mat-list">${recs.slice().reverse().map(r=>`<div class="mat-item deep-rec" data-id="${r.id}" style="cursor:pointer"><span class="mat-sym" style="color:#7B5EA7">◌</span><div class="mat-info"><div class="mat-name">${esc(r.title||"")}</div><div class="mat-meta">${esc(r.kind)} · ${esc(r.matName||"")}</div></div></div>`).join("")}</div>`:'<div class="tip">—</div>'}
+      ${otherRecs.length?`<div class="home-section-label">Recomendaciones de otros trabajos que podrían servir</div>
+        <div class="mat-list">${otherRecs.slice().reverse().map(r=>`<div class="mat-item deep-rec" data-id="${r.id}" style="cursor:pointer"><span class="mat-sym" style="color:#B85C38">◌</span><div class="mat-info"><div class="mat-name">${esc(r.title||"")}</div><div class="mat-meta">${esc(r.matName||"")} · comparte códigos</div></div></div>`).join("")}</div>`:""}
+      <div class="home-section-label">Ir a un material</div>
+      <div class="hscroll">${selMats.map(m=>`<button class="codelist-item deep-goto" data-mat="${m.id}">${MATERIAL_TYPES[m.type].sym} ${esc(m.name)}</button>`).join("")}</div>
+      <div class="home-section-label">Notas de esta exploración</div>
+      <div class="card">
+        <textarea class="field-ta" id="deep-note" placeholder="Escribí acá tus ideas integradas. Se guardan en esta pestaña."></textarea>
+        <button class="btn green sm" id="deep-save" style="margin-top:.5rem">Guardar nota</button>
+      </div>
+      ${deepNotes.length?`<div class="mat-list" style="margin-top:.7rem">${deepNotes.slice().reverse().map(n=>`<div class="mat-item"><span class="mat-sym" style="color:#2A5A8C">❖</span><div class="mat-info"><div class="frag-text" style="font-size:.85rem">${esc(n.body)}</div><div class="mat-meta">${n.date||""}</div></div><button class="icon-btn danger deep-ndel" data-id="${n.id}" title="Eliminar">🗑</button></div>`).join("")}</div>`:""}`;
+  }
+
+  c.innerHTML=`<div class="wrap">
+    <div class="page-head"><div class="page-title"><span style="color:#2A5A8C">❖</span> Trabajo en profundidad</div>
+      <div class="page-sub">Elegí uno o más trabajos ya procesados y exploralos de forma integrada: códigos, análisis, recomendaciones y coincidencias entre materiales.</div></div>
+    ${chooser}${body}
+  </div>`;
+  c.querySelectorAll(".deep-cb").forEach(cb=>cb.addEventListener("change",()=>{ deepSelected=[...c.querySelectorAll(".deep-cb:checked")].map(x=>x.value); renderProfundidadView(); }));
+  c.querySelectorAll(".deep-code").forEach(b=>b.onclick=()=>go("code-detail",b.dataset.id));
+  c.querySelectorAll(".deep-ana").forEach(b=>b.onclick=()=>openAnalysisView(b.dataset.id));
+  c.querySelectorAll(".deep-rec").forEach(b=>b.onclick=()=>openRecView(b.dataset.id));
+  c.querySelectorAll(".deep-goto").forEach(b=>b.onclick=()=>{ const mt=materials.find(x=>x.id===b.dataset.mat); activeMatId=b.dataset.mat; go(mt&&mt.type==="documentos"?"analizar":"codificar",{matId:b.dataset.mat}); });
+  document.getElementById("deep-save")?.addEventListener("click",()=>{ const t=document.getElementById("deep-note"); const body=(t?.value||"").trim(); if(!body){showToast("Escribí algo");return;} deepNotes.push({id:uid("deep"),title:body.slice(0,40),body,matIds:[...deepSelected],date:today()}); markDirty(); persist(); showToast("Nota guardada ✓"); renderProfundidadView(); });
+  c.querySelectorAll(".deep-ndel").forEach(b=>b.addEventListener("click",ev=>{ ev.stopPropagation(); deepNotes=deepNotes.filter(n=>n.id!==b.dataset.id); markDirty(); persist(); renderProfundidadView(); }));
+}
+
+// detalle de un código: todos sus fragmentos (req 4)
+function renderCodeDetail(codeId){
+  const code=findCode(codeId);
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:"Nube",route:"nube"},{label:code?code.code:"Código"}]);
+  const c=document.getElementById("content");
+  if(!code){ c.innerHTML=`<div class="wrap"><div class="empty-state"><div class="empty-text">Código no encontrado.</div></div></div>`; return; }
+  const {freq,origins,occ}=codeStats(codeId);
+  c.innerHTML=`<div class="wrap">
+    <div class="code-detail-head"><span class="concept-node-freq">${freq}</span><div class="code-detail-name">${esc(code.code)}</div></div>
+    <div class="page-sub">Aparece en ${freq} fragmento${freq!==1?"s":""} · ${origins.length} origen${origins.length!==1?"es":""}: ${origins.map(esc).join(" · ")||"—"}</div>
+    <div style="margin-top:1.2rem">
+      ${occ.length===0?`<div class="empty-state"><div class="empty-text">Este código todavía no tiene fragmentos marcados.</div></div>`:
+        occ.map(o=>`<div class="frag-card" data-mat="${o.mat.id}" data-ann="${o.ann.id}" data-type="${o.mat.type}">
+          <div class="frag-src">${MATERIAL_TYPES[o.mat.type].sym} ${esc(o.mat.name)} · ${o.ann.date||""}</div>
+          <div class="frag-text"><span class="hl">${esc(o.ann.quote)}</span></div>
+          <div class="tip" style="margin-top:.4rem">Tocá para ir al fragmento en su material →</div>
+        </div>`).join("")}
+    </div>
+    <div style="margin-top:1.2rem;display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn outline sm" id="cd-rename">✎ Renombrar código</button>
+      <button class="btn danger sm" id="cd-del">🗑 Eliminar código</button>
+    </div>
+  </div>`;
+  c.querySelectorAll(".frag-card").forEach(el=>el.onclick=()=>{
+    const matId=el.dataset.mat, annId=el.dataset.ann, type=el.dataset.type;
+    flashAnn={matId,annId};
+    activeMatId=matId;
+    go(type==="documentos"?"analizar":"codificar",{matId});
+  });
+  document.getElementById("cd-rename").onclick=()=>renameCode(codeId);
+  document.getElementById("cd-del").onclick=()=>{
+    confirmModal("¿Eliminar código?",`Se quita “${esc(code.code)}” del vocabulario y se desmarcan sus ${freq} fragmento(s). No se borran los textos.`,()=>{
+      savedCodes=savedCodes.filter(c=>c.id!==codeId);
+      materials.forEach(m=>{ m.anns=(m.anns||[]).filter(a=>a.codeId!==codeId); });
+      markDirty(); persist(); go("nube");
+    },true);
+  };
+}
+function renameCode(codeId){
+  const code=findCode(codeId); if(!code) return;
+  openModal(`<div class="modal-head"><div class="modal-title">Renombrar código</div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body"><div class="field-row"><input class="field-in" id="rc-name" value="${esc(code.code)}"/></div></div>
+    <div class="modal-foot"><button class="btn outline" id="m-cancel">Cancelar</button><button class="btn green" id="m-ok">Guardar</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-cancel").onclick=closeModal;
+  document.getElementById("m-ok").onclick=()=>{ const n=val("rc-name"); if(!n)return; code.code=n; materials.forEach(m=>(m.anns||[]).forEach(a=>{if(a.codeId===codeId)a.label=n;})); markDirty(); persist(); closeModal(); renderCodeDetail(codeId); };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CITAR — APA 7 y Chicago 17 (sin IA) — lógica reutilizada
+// ═══════════════════════════════════════════════════════════════════════════
+function parseAutores(raw){
+  if(!raw.trim()) return [];
+  const parts=(raw.includes(";")||raw.includes("\n"))?raw.split(/[;\n]/).map(s=>s.trim()).filter(Boolean):[raw.trim()];
+  return parts.map(p=>{
+    if(p.includes(",")){ const [ap,...rest]=p.split(","); return {apellido:ap.trim(),nombre:rest.join(",").trim()}; }
+    const tk=p.trim().split(/\s+/);
+    if(tk.length===1) return {apellido:tk[0],nombre:""};
+    return {apellido:tk[tk.length-1],nombre:tk.slice(0,-1).join(" ")};
+  });
+}
+function inicial(n){ return n?n.split(/\s+/).map(x=>x[0]?.toUpperCase()+".").join(" "):""; }
+function formatAutoresAPA(a){
+  if(a.length===0) return "[Autor desconocido]";
+  if(a.length===1) return `${a[0].apellido}, ${inicial(a[0].nombre)}`;
+  if(a.length===2) return `${a[0].apellido}, ${inicial(a[0].nombre)}, & ${a[1].apellido}, ${inicial(a[1].nombre)}`;
+  if(a.length<=20){ const i=a.slice(0,-1).map(x=>`${x.apellido}, ${inicial(x.nombre)}`).join(", "); return `${i}, & ${a.slice(-1)[0].apellido}, ${inicial(a.slice(-1)[0].nombre)}`; }
+  return a.slice(0,19).map(x=>`${x.apellido}, ${inicial(x.nombre)}`).join(", ")+", ... "+a.slice(-1)[0].apellido+", "+inicial(a.slice(-1)[0].nombre);
+}
+function formatAutoresChicago(a){
+  if(a.length===0) return "[Autor desconocido]";
+  if(a.length===1) return `${a[0].apellido}, ${a[0].nombre}`;
+  const first=`${a[0].apellido}, ${a[0].nombre}`; const rest=a.slice(1).map(x=>`${x.nombre} ${x.apellido}`.trim());
+  if(a.length===2) return `${first} y ${rest[0]}`;
+  return `${first}, ${rest.slice(0,-1).join(", ")} y ${rest.slice(-1)[0]}`;
+}
+function citaTextoAPA(a,an){ if(a.length===0)return `([s.a.], ${an||"s.f."})`; if(a.length===1)return `(${a[0].apellido}, ${an||"s.f."})`; if(a.length===2)return `(${a[0].apellido} & ${a[1].apellido}, ${an||"s.f."})`; return `(${a[0].apellido} et al., ${an||"s.f."})`; }
+function citaTextoChicago(a,an){ if(a.length===0)return `([s.a.] ${an||"s.f."})`; if(a.length===1)return `(${a[0].apellido} ${an||"s.f."})`; if(a.length===2)return `(${a[0].apellido} y ${a[1].apellido} ${an||"s.f."})`; return `(${a[0].apellido} et al. ${an||"s.f."})`; }
+function generarCita(){
+  const s=citarState; const autores=parseAutores(s.autores); const anioStr=s.anio||"s.f.";
+  let apa="",chiAuFe="",chiNota=""; const tituloFull=s.titulo+(s.subtitulo?`: ${s.subtitulo}`:"");
+  const nombres=autores.map(a=>`${a.nombre} ${a.apellido}`.trim()).join(", ")||"[Autor desconocido]";
+  if(s.tipo==="libro"){
+    apa=`${formatAutoresAPA(autores)} (${anioStr}). *${tituloFull}*${s.edicion?` (${s.edicion} ed.)`:""}. ${s.editorial||"[Editorial]"}.${s.doi?` https://doi.org/${s.doi.replace(/^https?:\/\/doi\.org\//,"")}`:""}`;
+    chiAuFe=`${formatAutoresChicago(autores)}. ${anioStr}. *${tituloFull}*. ${s.lugar?s.lugar+": ":""}${s.editorial||"[Editorial]"}.`;
+    chiNota=`${nombres}, *${tituloFull}* (${s.lugar?s.lugar+": ":""}${s.editorial||"[Editorial]"}, ${anioStr})${s.paginas?`, ${s.paginas}`:""}.`;
+  } else if(s.tipo==="capitulo"){
+    apa=`${formatAutoresAPA(autores)} (${anioStr}). ${tituloFull}. En ${s.capEditores||"[Editores]"} (Eds.), *${s.capLibro||"[Título del libro]"}* (pp. ${s.paginas||"[pp.]"}). ${s.editorial||"[Editorial]"}.`;
+    chiAuFe=`${formatAutoresChicago(autores)}. ${anioStr}. "${tituloFull}". En *${s.capLibro||"[Título del libro]"}*, editado por ${s.capEditores||"[Editores]"}, ${s.paginas||"[pp.]"}. ${s.lugar?s.lugar+": ":""}${s.editorial||"[Editorial]"}.`;
+    chiNota=`${nombres}, "${tituloFull}", en *${s.capLibro||"[Título del libro]"}*, ed. ${s.capEditores||"[Editores]"} (${s.lugar?s.lugar+": ":""}${s.editorial||"[Editorial]"}, ${anioStr}), ${s.paginas||"[pp.]"}.`;
+  } else if(s.tipo==="articulo"){
+    apa=`${formatAutoresAPA(autores)} (${anioStr}). ${tituloFull}. *${s.revista||"[Revista]"}*, ${s.volumen||"[vol.]"}${s.numero?`(${s.numero})`:""}, ${s.paginas||"[pp.]"}.${s.doi?` https://doi.org/${s.doi.replace(/^https?:\/\/doi\.org\//,"")}`:""}`;
+    chiAuFe=`${formatAutoresChicago(autores)}. ${anioStr}. "${tituloFull}". *${s.revista||"[Revista]"}* ${s.volumen||"[vol.]"}${s.numero?`, no. ${s.numero}`:""}: ${s.paginas||"[pp.]"}.${s.doi?` https://doi.org/${s.doi.replace(/^https?:\/\/doi\.org\//,"")}.`:""}`;
+    chiNota=`${nombres}, "${tituloFull}", *${s.revista||"[Revista]"}* ${s.volumen||"[vol.]"}${s.numero?`, no. ${s.numero}`:""} (${anioStr}): ${s.paginas||"[pp.]"}.`;
+  } else if(s.tipo==="tesis"){
+    const nl=s.nivelTesis==="doctoral"?"Tesis doctoral":"Tesis de maestría";
+    apa=`${formatAutoresAPA(autores)} (${anioStr}). *${tituloFull}* [${nl}, ${s.universidad||"[Universidad]"}].`;
+    chiAuFe=`${formatAutoresChicago(autores)}. ${anioStr}. "${tituloFull}". ${nl}, ${s.universidad||"[Universidad]"}.`;
+    chiNota=`${nombres}, "${tituloFull}" (${nl}, ${s.universidad||"[Universidad]"}, ${anioStr}).`;
+  } else if(s.tipo==="web"){
+    apa=`${formatAutoresAPA(autores)} (${anioStr}). ${tituloFull}. *${s.sitio||"[Sitio web]"}*. ${s.url||"[URL]"}`;
+    chiAuFe=`${formatAutoresChicago(autores)}. ${anioStr}. "${tituloFull}". *${s.sitio||"[Sitio web]"}*. ${s.fechaAcceso?`Consultado el ${s.fechaAcceso}. `:""}${s.url||"[URL]"}.`;
+    chiNota=`${nombres}, "${tituloFull}", *${s.sitio||"[Sitio web]"}*, ${anioStr}, ${s.url||"[URL]"}.`;
+  } else if(s.tipo==="informe"){
+    apa=`${formatAutoresAPA(autores)} (${anioStr}). *${tituloFull}*. ${s.editorial||"[Institución]"}.${s.url?` ${s.url}`:""}`;
+    chiAuFe=`${formatAutoresChicago(autores)}. ${anioStr}. *${tituloFull}*. ${s.lugar?s.lugar+": ":""}${s.editorial||"[Institución]"}.${s.url?` ${s.url}.`:""}`;
+    chiNota=`${nombres}, *${tituloFull}* (${s.lugar?s.lugar+": ":""}${s.editorial||"[Institución]"}, ${anioStr})${s.paginas?`, ${s.paginas}`:""}.`;
+  }
+  return `**APA 7ª edición**\n${apa}\n\nCita en el texto: ${citaTextoAPA(autores,s.anio)}\n\n**Chicago 17 — Autor-Fecha**\n${chiAuFe}\n\nCita en el texto: ${citaTextoChicago(autores,s.anio)}\n\n**Chicago — Nota al pie**\n${chiNota}`;
+}
+const CITA_TIPOS=[["libro","Libro"],["capitulo","Capítulo de libro"],["articulo","Artículo de revista"],["tesis","Tesis"],["web","Página web"],["informe","Informe / documento institucional"]];
+function citaField(label,key,ph){ return `<div class="field-row"><label class="field-label">${label}</label><input class="field-in cita-f" data-k="${key}" value="${esc(citarState[key]||"")}" placeholder="${ph||""}"/></div>`; }
+function renderCitarView(){
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:"Citar"}]);
+  const c=document.getElementById("content"); const s=citarState;
+  let extra="";
+  if(s.tipo==="libro") extra=`<div class="field-2col">${citaField("Editorial","editorial")}${citaField("Lugar","lugar")}</div><div class="field-2col">${citaField("Edición (n°)","edicion")}${citaField("DOI (opcional)","doi")}</div>`;
+  else if(s.tipo==="capitulo") extra=`${citaField("Título del libro","capLibro")}${citaField("Editores del libro","capEditores")}<div class="field-2col">${citaField("Editorial","editorial")}${citaField("Páginas","paginas")}</div>${citaField("Lugar","lugar")}`;
+  else if(s.tipo==="articulo") extra=`${citaField("Revista","revista")}<div class="field-2col">${citaField("Volumen","volumen")}${citaField("Número","numero")}</div><div class="field-2col">${citaField("Páginas","paginas")}${citaField("DOI (opcional)","doi")}</div>`;
+  else if(s.tipo==="tesis") extra=`${citaField("Universidad","universidad")}<div class="field-row"><label class="field-label">Nivel</label><select class="field-sel" id="cita-nivel"><option value="doctoral"${s.nivelTesis==="doctoral"?" selected":""}>Doctoral</option><option value="maestria"${s.nivelTesis==="maestria"?" selected":""}>Maestría</option></select></div>`;
+  else if(s.tipo==="web") extra=`${citaField("Sitio web","sitio")}${citaField("URL","url")}${citaField("Fecha de acceso","fechaAcceso","Ej: 30 de mayo de 2026")}`;
+  else if(s.tipo==="informe") extra=`<div class="field-2col">${citaField("Institución","editorial")}${citaField("Lugar","lugar")}</div>${citaField("URL (opcional)","url")}${citaField("Páginas (opcional)","paginas")}`;
+
+  const canGround=groundingAvailable();
+  const aiAssist = aiEnabled() ? `
+    <div class="card" style="margin-bottom:1rem;border-color:var(--code-border)">
+      <div class="field-label" style="margin-bottom:.4rem">◌ ¿No tenés todos los datos? Pedíselo a la IA</div>
+      <textarea class="field-ta" id="cita-ai-q" placeholder="Pegá lo que sepas: título, autor/a, o una frase del texto…"></textarea>
+      <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.5rem">
+        <button class="btn green sm" id="cita-ai-go">◌ Buscar y completar</button>
+        <label class="ai-toggle" id="cita-ground-toggle" title="${canGround?"Busca en Google real":"Solo en modelos 2.5"}" style="${canGround?"":"opacity:.5"}"><span class="ai-toggle-label">Buscar en la web</span><span class="ai-switch${(citarGrounding&&canGround)?" on":""}" id="cita-ground-sw"></span></label>
+      </div>
+      <div class="warn-box" style="margin-top:.5rem"><strong>Importante:</strong> la IA puede equivocarse en datos bibliográficos. ${canGround?"Con la búsqueda web activada se apoya en resultados reales, pero":"Sin búsqueda web responde de memoria, así que"} <strong>verificá siempre</strong> la cita antes de usarla.</div>
+      ${proGroundingWarning()}
+      <div id="cita-ai-status" class="tip" style="margin-top:.4rem"></div>
+    </div>` : "";
+  c.innerHTML=`<div class="wrap">
+    <div class="page-head"><div class="page-title"><span style="color:#B85C38">◎</span> Citar</div><div class="page-sub">Generá referencias en APA 7 y Chicago 17 desde un formulario. La IA es opcional: puede completar datos que falten.</div></div>
+    ${aiAssist}
+    <div class="field-2col">
+      <div class="card">
+        <div class="field-row"><label class="field-label">Tipo de fuente</label><select class="field-sel" id="cita-tipo">${CITA_TIPOS.map(([k,l])=>`<option value="${k}"${s.tipo===k?" selected":""}>${l}</option>`).join("")}</select></div>
+        ${citaField("Autor(es)","autores","Apellido, Nombre — separá varios con ;")}
+        <div class="field-2col">${citaField("Año","anio","2024")}${citaField("Título","titulo")}</div>
+        ${citaField("Subtítulo (opcional)","subtitulo")}
+        ${extra}
+        <button class="btn green" id="cita-gen" style="margin-top:.5rem">◎ Generar cita</button>
+      </div>
+      <div>
+        <div class="out-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem"><span class="field-label">Resultado</span><button class="btn outline sm" id="cita-copy">◎ Copiar</button></div>
+        <div class="cita-out" id="cita-out">${renderMd(generarCita())}</div>
+        <div class="tip" style="margin-top:.6rem">Revisá siempre el resultado: el formato depende de datos completos y correctos.</div>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById("cita-tipo").onchange=e=>{citarState.tipo=e.target.value;render();};
+  document.getElementById("cita-nivel")?.addEventListener("change",e=>{citarState.nivelTesis=e.target.value;refreshCita();});
+  c.querySelectorAll(".cita-f").forEach(f=>f.addEventListener("input",()=>{citarState[f.dataset.k]=f.value;}));
+  document.getElementById("cita-gen").onclick=refreshCita;
+  document.getElementById("cita-copy").onclick=()=>{ navigator.clipboard.writeText(generarCita().replace(/\*/g,"")); showToast("Citas copiadas ✓"); };
+  document.getElementById("cita-ground-toggle")?.addEventListener("click",()=>{ if(!canGround){showToast("Cambiá a un modelo 2.5 en Configuración.");return;} citarGrounding=!citarGrounding; document.getElementById("cita-ground-sw").classList.toggle("on",citarGrounding); });
+  document.getElementById("cita-ai-go")?.addEventListener("click",runCitarAI);
+}
+async function runCitarAI(){
+  const q=(document.getElementById("cita-ai-q")?.value||"").trim();
+  if(!q){ showToast("Pegá lo que sepas del texto"); return; }
+  const st=document.getElementById("cita-ai-status"); if(st) st.textContent="Buscando…";
+  const useGround=citarGrounding && groundingAvailable();
+  const sys=`Sos un asistente bibliográfico. ${useGround?"USÁ la búsqueda de Google para encontrar y verificar los datos reales de la referencia (autor, año, título exacto, editorial o revista, DOI). No inventes: si un dato no lo confirmás con la búsqueda, dejalo vacío.":"Completá solo con datos que conozcas con certeza; si dudás, dejá el campo vacío."} Devolvé EXCLUSIVAMENTE un objeto JSON válido (sin texto antes ni después, sin backticks) con estas claves (string; vacías si no las encontrás): tipo (uno de: libro, capitulo, articulo, tesis, web, informe), autores (formato "Apellido, Nombre; Apellido, Nombre"), anio, titulo, subtitulo, editorial, lugar, edicion, revista, volumen, numero, paginas, doi, url, sitio, capLibro, capEditores, universidad.`;
+  try{
+    const userMsg = useGround
+      ? `Buscá en internet los datos reales de esta referencia y verificalos antes de responder: ${q}`
+      : q;
+    let out=await callGemini(sys,userMsg,{maxTokens:700,temperature:0.1,grounding:useGround});
+    out=out.replace(/```json|```/g,"").trim();
+    const m=out.match(/\{[\s\S]*\}/); if(m) out=m[0];
+    const data=JSON.parse(out);
+    Object.keys(citarState).forEach(k=>{ if(data[k]!==undefined && data[k]!=="") citarState[k]=data[k]; });
+    if(data.tipo && CITA_TIPOS.some(t=>t[0]===data.tipo)) citarState.tipo=data.tipo;
+    let note,warn=false;
+    if(useGround && (!lastSources||!lastSources.length)){ warn=true; note="⚠ No se pudo confirmar la búsqueda web: completé con memoria, así que puede haber datos inventados. Causa posible: el modelo no buscó, se agotó la cuota/tokens, o el modelo no es Flash/Flash-Lite 2.5. Verificá la cita."; }
+    else if(!useGround){ warn=true; note=(citarGrounding?"⚠ El modelo elegido no permite búsqueda web gratis (usá Flash o Flash-Lite 2.5). ":"⚠ La búsqueda web está apagada. ")+"Completé con memoria: verificá la cita."; }
+    else { note="✓ Fuentes: "+lastSources.map(s=>`<a href="${esc(s.uri)}" target="_blank" rel="noopener" style="color:var(--green-mid)">${esc(s.title.slice(0,30))}</a>`).join(" · "); }
+    showToast("Datos completados · revisalos ✓");
+    render();
+    const st2=document.getElementById("cita-ai-status"); if(st2){ st2.innerHTML=note; st2.className=warn?"warn-box":"tip"; st2.style.marginTop=".4rem"; }
+  }catch(e){
+    const st3=document.getElementById("cita-ai-status"); if(st3){ st3.className="warn-box"; st3.style.marginTop=".4rem"; st3.textContent="No se pudo completar automáticamente. Posible causa: la IA está desactivada, falta tu clave, el modelo no es 2.5, o se agotó la cuota. Probá con más datos o cargalos a mano."; }
+  }
+}
+function refreshCita(){ document.getElementById("cita-out").innerHTML=renderMd(generarCita()); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BIBLIOGRAFÍA IA (recomendar) — prompt original preservado (req 15)
+// ═══════════════════════════════════════════════════════════════════════════
+const RECOMENDAR_SYSTEM = `[ROL Y OBJETIVO]
+Eres el curador bibliográfico experto de FARO (Fichero Analítico de Registro y Observación). Tu única tarea es recomendar bibliografía metodológica, teórica o empírica relevante y existente en el ámbito de las ciencias sociales (ej. políticas públicas, resiliencia climática, fiscalidad, sociología, relaciones internacionales). Tus recomendaciones deben aplicar criterios explícitos de equilibrio Norte-Sur, de género y lingüístico.
+
+[REGLA DE ORO: TOLERANCIA CERO A LA ALUCINACIÓN]
+Está TERMINANTEMENTE PROHIBIDO inventar, asumir o aproximar datos. Todo libro, artículo, autor o revista que recomiendes debe existir en el mundo real. No puedes mezclar autores reales con títulos ficticios.
+
+[INSTRUCCIONES DE OPERACIÓN Y BÚSQUEDA WEB OBLIGATORIA]
+Para responder a la solicitud, estás OBLIGADO a utilizar tu herramienta de búsqueda en internet (Google Search). No confíes en tu memoria para los metadatos.
+1. Busca activamente la consulta del usuario para encontrar literatura académica real.
+2. Verifica mediante los resultados web que el cruce de Autor + Título + Revista/Editorial sea exacto y verídico.
+3. Prioriza la diversidad: busca activamente voces de América Latina y el Sur Global, así como autoras mujeres.
+
+[MANEJO DE METADATOS Y RESTRICCIONES]
+- Si confirmas en la web que una obra existe, pero no encuentras el año exacto, utiliza "(s.f.)". Si no encuentras la editorial, omítela, pero nunca inventes un nombre que suene plausible.
+- Si la consulta es tan específica que la búsqueda web no arroja resultados académicos reales, responde: "No he encontrado bibliografía académica exacta y verificada en la web para esta consulta. Te sugiero buscar en repositorios (como Google Scholar o SciELO) usando estos descriptores: [Inserta 3 palabras clave]".
+
+[FORMATO DE SALIDA (Markdown Limpio)]
+Presenta entre 3 y 5 recomendaciones en una lista estructurada en cuatro secciones (OBRAS FUNDAMENTALES, PERSPECTIVAS DESDE EL SUR GLOBAL, APORTES FEMINISTAS, DECOLONIALES Y DISIDENTES, DIÁLOGOS CONTEMPORÁNEOS)
+
+- **[Autor/a(s)] ([Año o "s.f."]).** *[Título exacto de la obra]*. [Editorial o Revista científica].
+  *¿Por qué leerlo?:* [Breve explicación de 2 líneas conectando el rigor del texto con la consulta del usuario].`;
+
+function renderRecomendarView(){
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:"Recomendar bibliografía"}]);
+  const c=document.getElementById("content");
+  if(!aiEnabled()){ renderLockedView("Recomendar bibliografía","◌","#7B5EA7"); return; }
+  const hasOut=!!recOut;
+  const canGround=groundingAvailable();
+  const srcHtml = (lastSources&&lastSources.length&&!recLoading)
+    ? `<div class="card" style="margin-top:.8rem"><div class="ai-box-label" style="margin-bottom:.4rem">Fuentes consultadas en la web</div>${lastSources.map((s,i)=>`<div style="font-size:.8rem;margin:.2rem 0"><a href="${esc(s.uri)}" target="_blank" rel="noopener" style="color:var(--green-mid)">[${i+1}] ${esc(s.title)}</a></div>`).join("")}</div>`
+    : "";
+  c.innerHTML=`<div class="wrap">
+    <div class="page-head"><div class="page-title"><span style="color:#7B5EA7">◌</span> Recomendar bibliografía</div>
+      <div class="page-sub">Recomendaciones con criterios explícitos de equilibrio Norte-Sur, de género y lingüístico. Verificá siempre cada referencia.</div></div>
+    <div class="card" style="margin-bottom:1rem">
+      <label class="field-label">¿Sobre qué tema, problema o pregunta buscás bibliografía?</label>
+      <textarea class="field-ta" id="rec-ta" placeholder="Describí el tema que estás trabajando…">${esc(recInput)}</textarea>
+      <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.6rem">
+        <button class="btn green sm" id="rec-go" ${recLoading?"disabled":""}>${recLoading?'<span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span> Explorando…':"◌ Explorar bibliografía"}</button>
+        <label class="ai-toggle" id="rec-ground-toggle" title="${canGround?"Busca en Google en tiempo real y cita las fuentes":"Solo disponible en modelos 2.5 (cambialo en Configuración)"}" style="${canGround?"":"opacity:.5"}">
+          <span class="ai-toggle-label">Buscar en la web</span><span class="ai-switch${(recGrounding&&canGround)?" on":""}" id="rec-ground-sw"></span>
+        </label>
+      </div>
+      <div class="tip" style="margin-top:.4rem">${canGround?"Con «Buscar en la web» activado, Gemini busca en Google de verdad y muestra las fuentes (gratis, hasta 500/día). Sin eso, recomienda «de memoria» y puede inventar datos.":"Tu modelo actual no tiene búsqueda web gratis. Para activarla, elegí Gemini 2.5 Flash o Flash-Lite en Configuración."}</div>
+      ${proGroundingWarning()}
+    </div>
+    ${recErr?`<div class="err-detail"><div class="err-detail-title">${esc(recErr.title)}</div><div class="err-detail-body">${esc(recErr.detail)}</div></div>`:""}
+    <div class="out-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem"><span class="field-label">Recomendaciones</span>${hasOut&&!recLoading?`<button class="btn outline sm" id="rec-copy">◎ Copiar</button>`:""}</div>
+    <div class="card ai-out" id="rec-out" style="min-height:120px">${hasOut?renderMd(recOut)+(recLoading?'<span class="cursor-blink"></span>':''):`<div class="tip">Las recomendaciones aparecerán acá, completas y con scroll propio.</div>`}</div>
+    ${srcHtml}
+    ${(hasOut&&!recLoading)?`<div class="warn-box" style="margin-top:.8rem">⚠ Aun con búsqueda web, revisá los datos finos (página, edición, año exacto) antes de citar: la búsqueda confirma la existencia y lo central, pero el detalle fino siempre se chequea.</div>`:""}
+  </div>`;
+  document.getElementById("rec-ta").addEventListener("input",e=>recInput=e.target.value);
+  document.getElementById("rec-go").onclick=runRecomendar;
+  document.getElementById("rec-ground-toggle")?.addEventListener("click",()=>{ if(!canGround){showToast("Cambiá a un modelo 2.5 en Configuración para usar la búsqueda web.");return;} recGrounding=!recGrounding; document.getElementById("rec-ground-sw").classList.toggle("on",recGrounding); });
+  document.getElementById("rec-copy")?.addEventListener("click",()=>{navigator.clipboard.writeText(recOut);showToast("Copiado ✓");});
+}
+async function runRecomendar(){
+  const q=(document.getElementById("rec-ta")?.value||"").trim(); recInput=q;
+  if(!q){ showToast("Describí el tema primero"); return; }
+  const useGround = recGrounding && groundingAvailable();
+  recLoading=true; recOut=""; recErr=null; lastSources=[]; renderRecomendarView();
+  let system=RECOMENDAR_SYSTEM+"\n\n"+NO_FILLER+projectContext()+priorWorkContext();
+  if(useGround) system+="\n\nIMPORTANTE — USÁ LA BÚSQUEDA DE GOOGLE: antes de proponer cualquier obra, BUSCÁ en Google para confirmar que existe y que sus datos son correctos (autor/a, año, título exacto, editorial o revista). Hacé búsquedas reales para CADA referencia. No incluyas ninguna obra que no hayas podido verificar con una búsqueda. Es preferible una lista más corta y verificada que una extensa con datos inventados.";
+  // El disparador fiable de la búsqueda es pedirlo en el propio mensaje, no solo en la instrucción interna.
+  const userMsg = useGround
+    ? `Buscá en internet trabajos académicos reales sobre: ${q}.\nVerificá con la búsqueda que cada obra existe (autor/a, año, título, editorial o revista) antes de incluirla, y citá las fuentes.`
+    : q;
+  try{
+    let acc="";
+    await streamGemini(system,userMsg,(ch)=>{ acc+=ch; recOut=acc; const o=document.getElementById("rec-out"); if(o){o.innerHTML=renderMd(acc)+'<span class="cursor-blink"></span>';} },{maxTokens:3800,temperature:0.85,grounding:useGround});
+    recOut=acc;
+    if(useGround && (!lastSources || !lastSources.length)){
+      recErr={title:"⚠ No se pudo confirmar la búsqueda web",detail:"Esta respuesta no trae fuentes, así que probablemente salió de memoria y puede contener datos inventados. Posibles causas: el modelo no realizó la búsqueda para este pedido (reintentá o sé más específica con el tema), se agotó la cuota diaria (500/día) o el límite de tokens, o el modelo no es Flash/Flash-Lite 2.5. Verificá cada referencia antes de usarla."};
+    } else if(!useGround){
+      recErr={title:"⚠ Búsqueda web desactivada",detail:(recGrounding?"El modelo elegido no permite búsqueda web gratis: usá Flash 2.5 o Flash-Lite 2.5 en Configuración.":"El interruptor «Buscar en la web» está apagado.")+" Esta respuesta es de memoria y puede inventar referencias."};
+    }
+    history=[{mode:"recomendar",label:"Bibliografía",date:today(),input:q,output:acc},...history].slice(0,12); persist();
+  }catch(e){ recErr=e._diag||{title:"⚠ Error",detail:String(e)}; }
+  recLoading=false; renderRecomendarView();
+}
+function renderLockedView(title,sym,col){
+  const c=document.getElementById("content"); const paused=hasKey()&&!aiOn;
+  c.innerHTML=`<div class="wrap"><div class="empty-state" style="padding-top:3rem">
+    <div class="empty-sigil" style="color:${col};opacity:.5">${sym}</div>
+    <div class="page-title" style="justify-content:center;margin:.5rem 0">${title} <em>· ${paused?"IA en pausa":"requiere IA"}</em></div>
+    <div class="empty-text" style="max-width:460px;margin:0 auto 1.2rem">${paused?"Tenés la IA desactivada con el interruptor de arriba. Activala para usar esta sección.":"Esta sección usa IA. Necesitás una clave gratuita de Google Gemini (sin tarjeta, 5 minutos)."}</div>
+    <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
+      ${paused?`<button class="btn green" id="lk-enable">◈ Activar la IA</button>`:`<button class="btn green" id="lk-config">⚙ Configurar Gemini</button><button class="btn outline" id="lk-guide">Cómo conseguir la clave</button>`}
+    </div></div></div>`;
+  document.getElementById("lk-enable")?.addEventListener("click",()=>{setAiOn(true).then(render);});
+  document.getElementById("lk-config")?.addEventListener("click",()=>go("config"));
+  document.getElementById("lk-guide")?.addEventListener("click",showGuideModal);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN (req 5)
+// ═══════════════════════════════════════════════════════════════════════════
+function renderConfigView(){
+  setBreadcrumbs([{label:"Inicio",route:"home"},{label:"Configuración"}]);
+  const c=document.getElementById("content");
+  c.innerHTML=`<div class="wrap">
+    <div class="page-head"><div class="page-title"><span style="color:#5C5040">⚙</span> Configuración</div></div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="field-label" style="font-size:.9rem;margin-bottom:.6rem">◈ Inteligencia artificial (Gemini · gratis, sin tarjeta)</div>
+      <div class="field-row"><label class="field-label">Tu clave de Gemini</label>
+        <div style="display:flex;gap:.4rem"><input class="field-in" id="cfg-key" type="password" placeholder="AIza…" value="${esc(getKey())}"/><button class="icon-btn" id="cfg-eye" title="Ver/ocultar">◉</button></div></div>
+      <div class="field-row"><label class="field-label">Modelo</label>
+        <select class="field-sel" id="cfg-model">${MODEL_OPTIONS.map(o=>`<option value="${o.id}"${getModel()===o.id?" selected":""}>${o.label} — ${o.desc}</option>`).join("")}</select></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.3rem">
+        <button class="btn green sm" id="cfg-save">Guardar clave</button>
+        <button class="btn outline sm" id="cfg-test">Probar conexión</button>
+        <button class="btn outline sm" id="cfg-guide">Cómo conseguir la clave</button>
+      </div>
+      <div id="cfg-test-out" class="tip" style="margin-top:.5rem"></div>
+      <div class="warn-box" style="margin-top:.6rem">La clave queda <strong>solo en tu navegador</strong> (IndexedDB). Nunca pasa por ningún servidor nuestro.</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="field-label" style="font-size:.9rem;margin-bottom:.6rem">⚙ Preferencias</div>
+      <label class="link-mat-row"><input type="checkbox" id="cfg-ai" ${aiOn?"checked":""}/> IA activada</label>
+      <label class="link-mat-row"><input type="checkbox" id="cfg-theme" ${darkMode?"checked":""}/> Tema oscuro</label>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem">
+      <div class="field-label" style="font-size:.9rem;margin-bottom:.6rem">⤓ Respaldo de tus datos</div>
+      <div class="tip" style="margin-bottom:.6rem">Todo se guarda en este navegador. Conviene exportar un respaldo cada tanto (y antes de limpiar el navegador).</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn green sm" id="cfg-export">⤓ Exportar respaldo (.json)</button>
+        <label class="btn outline sm" style="cursor:pointer">⤒ Importar respaldo<input type="file" accept=".json" id="cfg-import" hidden/></label>
+      </div>
+    </div>
+
+    <details class="card" style="border-color:var(--err-border)">
+      <summary style="cursor:pointer;font-weight:600;color:var(--amber);font-size:.86rem">⚠ Opciones avanzadas — borrar datos</summary>
+      <div style="margin-top:.8rem">
+        <div class="warn-box"><strong>Cuidado:</strong> esto borra de forma permanente <strong>todo</strong> lo guardado en este navegador: tu proyecto, todos los materiales (notas, entrevistas, bibliografía), códigos, análisis y carpetas. <strong>No se puede deshacer.</strong> Tu clave de Gemini también se elimina. Exportá un respaldo antes.</div>
+        <button class="btn danger sm" id="cfg-wipe">Borrar todos mis datos</button>
+      </div>
+    </details>
+  </div>`;
+
+  document.getElementById("cfg-eye").onclick=()=>{const i=document.getElementById("cfg-key");i.type=i.type==="password"?"text":"password";};
+  document.getElementById("cfg-save").onclick=async()=>{ await setKey(val("cfg-key")); await setModel(document.getElementById("cfg-model").value); showToast("Clave guardada ✓"); render(); };
+  document.getElementById("cfg-model").onchange=async e=>{ await setModel(e.target.value); };
+  document.getElementById("cfg-test").onclick=async()=>{ const out=document.getElementById("cfg-test-out"); out.textContent="Probando…"; await setKey(val("cfg-key")); const r=await testGeminiConnection(); out.innerHTML=r.ok?`<span style="color:var(--green-mid)">✓ Conexión correcta. Respuesta: “${esc(r.sample)}”.</span>`:`<span style="color:var(--amber)">${esc(r.diag.title)} — ${esc(r.diag.detail)}</span>`; updateStatus(); };
+  document.getElementById("cfg-guide").onclick=showGuideModal;
+  document.getElementById("cfg-ai").onchange=async e=>{ await setAiOn(e.target.checked); render(); };
+  document.getElementById("cfg-theme").onchange=async e=>{ await setTheme(e.target.checked); applyTheme(); };
+  document.getElementById("cfg-export").onclick=exportAll;
+  document.getElementById("cfg-import").onchange=importAll;
+  document.getElementById("cfg-wipe").onclick=wipeAll;
+}
+function exportAll(){
+  const data={_app:"faro",_v:10,date:new Date().toISOString(),project,materials,folders,savedCodes,savedAnalyses,recomendaciones,deepNotes,cats};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`faro-${today().replace(/\//g,"-")}.json`; a.click();
+  showToast("Respaldo exportado ✓");
+}
+function importAll(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      confirmModal("¿Importar respaldo?","Esto reemplaza tu proyecto, materiales, códigos, análisis, recomendaciones y notas actuales por los del archivo. Exportá un respaldo antes si tenés dudas.",async()=>{
+        project=d.project||project; materials=d.materials||[]; folders=d.folders||[]; savedCodes=d.savedCodes||[]; savedAnalyses=d.savedAnalyses||[]; recomendaciones=d.recomendaciones||[]; deepNotes=d.deepNotes||[]; cats=d.cats||{};
+        await persist(); showToast("Respaldo importado ✓"); go("home");
+      });
+    }catch{ showToast("El archivo no es un respaldo válido."); }
+  };
+  r.readAsText(f);
+}
+function wipeAll(){
+  confirmModal("¿Seguro que querés borrar TODO?","Primer aviso: esto elimina permanentemente todos tus datos de este navegador.",()=>{
+    confirmModal("Confirmación final","Segundo y último aviso: no hay vuelta atrás. ¿Borrar todo ahora?",async()=>{
+      project={tema:"",objetivoGeneral:"",objetivosEspecificos:"",enfoque:"",campo:"",poblacion:"",estadoArte:"",metodologia:""};
+      materials=[]; folders=[]; savedCodes=[]; savedAnalyses=[]; cats={}; history=[];
+      await persist(); await setKey(""); showToast("Todos los datos fueron borrados"); go("home");
+    },true);
+  },true);
+}
+function showGuideModal(){
+  openModal(`<div class="modal-head"><div class="modal-title">Cómo conseguir tu clave de Gemini <em>· gratis</em></div><button class="modal-close" id="m-close">✕</button></div>
+    <div class="modal-body">
+      <div class="ai-out">
+        <div class="md-bul"><span class="md-dot">1</span><span>Entrá a <strong>aistudio.google.com/app/apikey</strong> con tu cuenta de Google.</span></div>
+        <div class="md-bul"><span class="md-dot">2</span><span>Aceptá los términos. Tu cuenta debe tener <strong>18+ años</strong> confirmados (si no, da error de permiso).</span></div>
+        <div class="md-bul"><span class="md-dot">3</span><span>Tocá <strong>«Create API key»</strong> y copiá la clave (empieza con «AIza…»).</span></div>
+        <div class="md-bul"><span class="md-dot">4</span><span>Pegала en Configuración y guardá. <strong>No requiere tarjeta de crédito.</strong></span></div>
+      </div>
+      <div class="warn-box" style="margin-top:.8rem">Es un servicio gratuito de Google con límites diarios generosos. La transcripción de audio y cada consulta de IA consumen parte de esa cuota.</div>
+    </div>
+    <div class="modal-foot"><button class="btn green" id="m-ok">Entendido</button></div>`);
+  document.getElementById("m-close").onclick=closeModal; document.getElementById("m-ok").onclick=closeModal;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT / BOOT
+// ═══════════════════════════════════════════════════════════════════════════
+async function init(){
+  let migratedNow=false;
+  try{
+    migratedNow = await loadState();
+    await loadCreds();
+  }catch(e){
+    console.error(e);
+  }
+  applyTheme();
+  // header bindings
+  document.getElementById("home-btn").onclick=()=>go("home");
+  document.getElementById("theme-btn").onclick=async()=>{ await setTheme(!darkMode); applyTheme(); };
+  document.getElementById("ai-toggle").onclick=async()=>{ await setAiOn(!aiOn); updateStatus(); render(); };
+  window.addEventListener("resize",()=>{ renderSidebar(); });
+  loaded=true;
+  route="home";
+  render();
+  setSavePill("saved");
+  // aviso discreto si se recuperaron datos de una sesión anterior
+  if(migratedNow && (materials.length||savedCodes.length||savedAnalyses.length||project.tema)){
+    setTimeout(()=>showToast("Se recuperaron tus datos de una sesión anterior ✓"),600);
+  }
+}
+init();
+</script>
+</body>
+</html>
