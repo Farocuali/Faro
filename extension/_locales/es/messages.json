@@ -1,0 +1,14 @@
+{
+  "nombre": {
+    "message": "FARO · Investigación cualitativa"
+  },
+  "descripcion": {
+    "message": "FARO completo en Chrome: codificá en Google Docs y en la web, analizá, citá y buscá bibliografía verificada."
+  },
+  "titulo_accion": {
+    "message": "FARO"
+  },
+  "atajo": {
+    "message": "Capturar la selección (en Google Docs: codificar)"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "faro-extension",
+  "version": "1.4.0",
+  "private": true,
+  "description": "FARO (Fichero Analítico de Registro y Observación) for the browser: qualitative coding in Google Docs and on the web.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node tests/correr.js",
+    "test:unidad": "node tests/correr.js --sin-navegador",
+    "empaquetar": "python3 herramientas/empaquetar.py",
+    "importar-faro": "python3 herramientas/importar-faro.py"
+  },
+  "devDependencies": {
+    "addons-linter": "10.15.0",
+    "jsdom": "24.1.3",
+    "playwright": "1.63.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

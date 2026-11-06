@@ -1,0 +1,14 @@
+{
+  "nombre": {
+    "message": "FARO · Qualitative research"
+  },
+  "descripcion": {
+    "message": "Full FARO in your browser: code in Google Docs and on the web, analyse, cite and find verified bibliography."
+  },
+  "titulo_accion": {
+    "message": "FARO"
+  },
+  "atajo": {
+    "message": "Capture the selection (in Google Docs: code it)"
+  }
+}

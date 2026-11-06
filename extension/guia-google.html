@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FARO · Conectar Google</title>
+  <style>
+    :root { --fondo:#fbf8f1; --texto:#1d2433; --suave:#5f6778; --borde:#e2ded4; --acento:#1f3a5f; --luz:#e8a33d; --luz-suave:#fbeed8; }
+    @media (prefers-color-scheme: dark) { :root { --fondo:#12161e; --texto:#e8e6e1; --suave:#9aa1b0; --borde:#2c3442; --acento:#8fb3e0; --luz:#f0b357; --luz-suave:#3a2f1e; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fondo); color: var(--texto); font: 16px/1.6 Georgia, "Times New Roman", serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+    header { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+    header img { width: 48px; height: 48px; }
+    h1 { font-size: 30px; margin: 0; color: var(--acento); font-weight: 600; }
+    .intro { color: var(--suave); margin: 0 0 28px; }
+    ol.pasos { list-style: none; counter-reset: paso; padding: 0; margin: 0; }
+    ol.pasos > li { counter-increment: paso; position: relative; padding: 0 0 26px 52px; border-left: 2px solid var(--borde); margin-left: 17px; }
+    ol.pasos > li:last-child { border-left-color: transparent; }
+    ol.pasos > li::before {
+      content: counter(paso); position: absolute; left: -19px; top: -2px; width: 36px; height: 36px; border-radius: 50%;
+      background: var(--acento); color: var(--fondo); font: 600 15px/36px system-ui, sans-serif; text-align: center;
+    }
+    h2 { font: 600 18px/1.3 system-ui, sans-serif; margin: 4px 0 6px; }
+    p, li { margin: 6px 0; }
+    ul { padding-left: 20px; }
+    code, .dato { font-family: ui-monospace, "IBM Plex Mono", Menlo, monospace; font-size: 14px; }
+    code { background: var(--luz-suave); padding: 1px 5px; border-radius: 4px; }
+    .copiar { display: flex; gap: 8px; margin: 8px 0; }
+    .dato { flex: 1; padding: 8px 10px; border: 1px solid var(--borde); border-radius: 6px; background: transparent; color: var(--texto); min-width: 0; }
+    button { font: 600 14px system-ui, sans-serif; border: 1px solid var(--acento); background: var(--acento); color: var(--fondo); border-radius: 6px; padding: 6px 14px; cursor: pointer; }
+    a { color: var(--acento); }
+    .nota { font-size: 14px; color: var(--suave); border-left: 3px solid var(--luz); padding: 4px 0 4px 12px; margin: 10px 0; }
+    .caja { border: 1px solid var(--borde); border-radius: 10px; padding: 16px 18px; margin-top: 30px; font-size: 15px; }
+    .caja h3 { font: 600 15px system-ui, sans-serif; margin: 0 0 6px; }
+  </style>
+</head>
+<body>
+<main id="guia-es">
+  <header><img src="icons/icon128.png" alt=""><h1>Conectar FARO con Google</h1></header>
+  <p class="intro">Se hace una sola vez, en unos 15 minutos. Creás un acceso propio y gratuito en Google Cloud: así tus documentos van directo de tu cuenta a FARO, sin pasar por ningún servidor de terceros. Google cambia a veces los nombres de los menús: si algo no coincide exactamente, buscá el más parecido.</p>
+
+  <ol class="pasos">
+    <li>
+      <h2>Crear el proyecto</h2>
+      <p>Entrá a <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">console.cloud.google.com</a> con tu cuenta de Google, creá un proyecto nuevo llamado <code>FARO</code> y seleccionalo arriba a la izquierda.</p>
+    </li>
+    <li>
+      <h2>Habilitar las APIs de Drive, Docs y el selector</h2>
+      <p>Abrí estos tres enlaces (con el proyecto FARO seleccionado) y tocá <b>Habilitar</b> en cada uno:</p>
+      <ul>
+        <li><a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Drive API</a></li>
+        <li><a href="https://console.cloud.google.com/apis/library/docs.googleapis.com" target="_blank" rel="noopener">Google Docs API</a></li>
+        <li><a href="https://console.cloud.google.com/apis/library/picker.googleapis.com" target="_blank" rel="noopener">Google Picker API</a> (el selector con el que cada persona le da acceso a FARO a un Doc)</li>
+      </ul>
+    </li>
+    <li>
+      <h2>Configurar la pantalla de consentimiento</h2>
+      <p>Andá a <a href="https://console.cloud.google.com/auth/overview" target="_blank" rel="noopener">Google Auth Platform</a> y tocá <b>Comenzar</b>:</p>
+      <ul>
+        <li>Nombre de la app: <code>FARO</code>. Correo de asistencia: el tuyo.</li>
+        <li>Público: <b>Externo</b>.</li>
+        <li>Datos de contacto: tu correo. Aceptá la política y tocá <b>Crear</b>.</li>
+      </ul>
+      <p>Después, en <b>Público</b> (Audience), bajá hasta <b>Usuarios de prueba</b> y agregá tu propio correo de Google.</p>
+    </li>
+    <li>
+      <h2>Crear el Client ID</h2>
+      <p>En <a href="https://console.cloud.google.com/auth/clients/create" target="_blank" rel="noopener">Clientes → Crear cliente</a>:</p>
+      <ul>
+        <li>Tipo de aplicación: <b>Aplicación web</b>. Nombre: <code>FARO extensión</code>.</li>
+        <li>En <b>Orígenes autorizados de JavaScript</b> agregá: <code>https://farocuali.github.io</code></li>
+        <li>En <b>URIs de redireccionamiento autorizados</b> tocá <b>Agregar URI</b> y pegá cada una de estas (la primera sirve para este navegador; la segunda, para tablets y celulares con Firefox):</li>
+      </ul>
+      <div class="uris"></div>
+      <p>Tocá <b>Crear</b>. Google te muestra el <b>ID de cliente</b>: algo como <code>123456789-abc.apps.googleusercontent.com</code>. Copialo. El número del principio es el número de tu proyecto: el selector lo necesita.</p>
+    </li>
+    <li>
+      <h2>Crear la clave del selector</h2>
+      <p>En <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credenciales</a> tocá <b>Crear credenciales → Clave de API</b> y después <b>Editar</b> esa clave:</p>
+      <ul>
+        <li><b>Restricciones de aplicación</b>: <b>Sitios web</b>, y agregá <code>https://farocuali.github.io/*</code> y <code>https://docs.google.com/*</code> (Google exige este último para el selector).</li>
+        <li><b>Restricciones de API</b>: elegí solo <b>Google Picker API</b>.</li>
+      </ul>
+      <p>Guardá y copiá la clave (empieza con <code>AIza</code>).</p>
+    </li>
+    <li>
+      <h2>Pegar todo en FARO y conectar</h2>
+      <p>Abrí FARO, tocá el botón <b>G</b> de arriba a la derecha, pegá el Client ID y la clave del selector, y tocá <b>Guardar</b>. Después, <b>Conectar con Google</b>.</p>
+      <p class="nota">Google va a avisar que «Google no verificó esta app». Es normal mientras la app está en modo de prueba. Tocá <b>Avanzado → Ir a FARO</b> y aceptá el permiso: ver y editar solo los archivos que uses con FARO.</p>
+      <p>La primera vez que codifiques un Doc con Google conectado, el panel de FARO te ofrece <b>«Dar acceso a FARO a este Doc»</b>: se abre el selector de Google con ese documento, lo elegís y listo. Se hace una vez por Doc.</p>
+    </li>
+  </ol>
+
+  <div class="caja">
+    <h3>Qué puede ver FARO</h3>
+    <p>FARO usa el permiso <b>por archivo</b> de Google: solo puede ver los archivos que crea (la carpeta «FARO», los respaldos y los Docs de resultados) y los Docs a los que vos le das acceso con el selector. En esos Docs lee el texto y guarda los códigos (como rangos con nombre), junto con el resaltado. No puede ver el resto de tu Drive. Podés desconectar la cuenta en cualquier momento desde el botón G, o desde <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</p>
+  </div>
+
+  <div class="caja">
+    <h3>Cuando la publiques en la Chrome Web Store</h3>
+    <p>La tienda le asigna a la extensión un ID nuevo. Volvé al cliente del paso 4 y agregá una segunda URI con ese ID: <code>https://ID-DE-LA-TIENDA.chromiumapp.org/</code>. Como FARO usa solo el permiso por archivo, que Google clasifica como no sensible, para abrirla a todo el mundo alcanza con pasar la app a «En producción» en Google Auth Platform (puede que Google pida verificar el nombre y el logo de la marca).</p>
+  </div>
+</main>
+<main id="guia-en" hidden>
+  <header><img src="icons/icon128.png" alt=""><h1>Connect FARO to Google</h1></header>
+  <p class="intro">You do this once, in about 15 minutes. You create your own free access in Google Cloud: your documents go straight from your account to FARO, without passing through any third-party server. Google sometimes renames its menus: if something doesn't match exactly, pick the closest option.</p>
+  <ol class="pasos">
+    <li>
+      <h2>Create the project</h2>
+      <p>Go to <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">console.cloud.google.com</a> with your Google account, create a new project called <code>FARO</code> and select it at the top left.</p>
+    </li>
+    <li>
+      <h2>Enable the Drive, Docs and Picker APIs</h2>
+      <p>Open these three links (with the FARO project selected) and click <b>Enable</b> on each:</p>
+      <ul>
+        <li><a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener">Google Drive API</a></li>
+        <li><a href="https://console.cloud.google.com/apis/library/docs.googleapis.com" target="_blank" rel="noopener">Google Docs API</a></li>
+        <li><a href="https://console.cloud.google.com/apis/library/picker.googleapis.com" target="_blank" rel="noopener">Google Picker API</a> (the picker people use to give FARO access to a Doc)</li>
+      </ul>
+    </li>
+    <li>
+      <h2>Set up the consent screen</h2>
+      <p>Go to <a href="https://console.cloud.google.com/auth/overview" target="_blank" rel="noopener">Google Auth Platform</a> and click <b>Get started</b>:</p>
+      <ul>
+        <li>App name: <code>FARO</code>. Support email: yours.</li>
+        <li>Audience: <b>External</b>.</li>
+        <li>Contact information: your email. Accept the policy and click <b>Create</b>.</li>
+      </ul>
+      <p>Then, under <b>Audience</b>, scroll to <b>Test users</b> and add your own Google email.</p>
+    </li>
+    <li>
+      <h2>Create the Client ID</h2>
+      <p>Under <a href="https://console.cloud.google.com/auth/clients/create" target="_blank" rel="noopener">Clients → Create client</a>:</p>
+      <ul>
+        <li>Application type: <b>Web application</b>. Name: <code>FARO extension</code>.</li>
+        <li>Under <b>Authorized JavaScript origins</b> add: <code>https://farocuali.github.io</code></li>
+        <li>Under <b>Authorized redirect URIs</b> click <b>Add URI</b> and paste each of these (the first works for this browser; the second, for tablets and phones with Firefox):</li>
+      </ul>
+      <div class="uris"></div>
+      <p>Click <b>Create</b>. Google shows you the <b>Client ID</b>: something like <code>123456789-abc.apps.googleusercontent.com</code>. Copy it. The leading number is your project number: the picker needs it.</p>
+    </li>
+    <li>
+      <h2>Create the picker key</h2>
+      <p>Under <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials</a> click <b>Create credentials → API key</b>, then <b>Edit</b> that key:</p>
+      <ul>
+        <li><b>Application restrictions</b>: <b>Websites</b>, and add <code>https://farocuali.github.io/*</code> and <code>https://docs.google.com/*</code> (Google requires the latter for the picker).</li>
+        <li><b>API restrictions</b>: choose only <b>Google Picker API</b>.</li>
+      </ul>
+      <p>Save and copy the key (it starts with <code>AIza</code>).</p>
+    </li>
+    <li>
+      <h2>Paste everything in FARO and connect</h2>
+      <p>Open FARO, click the <b>G</b> button at the top right, paste the Client ID and the picker key, and click <b>Save</b>. Then <b>Connect with Google</b>.</p>
+      <p class="nota">Google will warn that “Google hasn't verified this app”. That's expected while the app is in testing mode. Click <b>Advanced → Go to FARO</b> and accept the permission: see and edit only the files you use with FARO.</p>
+      <p>The first time you code a Doc with Google connected, the FARO panel offers <b>“Give FARO access to this Doc”</b>: Google's picker opens with that document, you choose it and that's it. Once per Doc.</p>
+    </li>
+  </ol>
+  <div class="caja">
+    <h3>What FARO can see</h3>
+    <p>FARO uses Google's <b>per-file</b> permission: it can only see the files it creates (the “FARO” folder, backups and result Docs) and the Docs you give it access to with the picker. In those Docs it reads the text and stores the codes (as named ranges) along with the highlighting. It can't see the rest of your Drive. You can disconnect at any time from the G button, or at <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</p>
+  </div>
+  <div class="caja">
+    <h3>When you publish it on the Chrome Web Store</h3>
+    <p>The store gives the extension a new ID. Go back to the client in step 4 and add another URI with that ID: <code>https://STORE-ID.chromiumapp.org/</code>. Since FARO only uses the per-file permission, which Google classifies as non-sensitive, opening it to everyone means switching the app to “In production” in Google Auth Platform (Google may ask to verify the brand name and logo).</p>
+  </div>
+</main>
+<script src="i18n.js"></script>
+<script src="guia-google.js"></script>
+</body>
+</html>

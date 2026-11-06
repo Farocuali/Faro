@@ -1,0 +1,31 @@
+const fs = require('fs');
+const { RAIZ, ok } = require('./util'); const dir = RAIZ + '/';
+const local = {}, session = {}, tabs = [];
+const area = (o) => ({ get: async (k) => { const r = {}; [].concat(k).forEach(x => { if (x in o) r[x] = o[x]; }); return r; }, set: async (v) => Object.assign(o, v), remove: async (k) => [].concat(k).forEach(x => delete o[x]) });
+const chrome = { storage: { local: area(local), session: area(session) }, tabs: { create: async (o) => { tabs.push(o.url); return { id: 9 }; } } }; // sin identity
+const ctx = { chrome, URLSearchParams, URL, crypto: globalThis.crypto };
+ctx.self = ctx;
+const fetch = async (u) => ({ ok: true, json: async () => ({ email: 'mic@gmail.com' }) });
+new Function('self', 'chrome', 'fetch', 'crypto', fs.readFileSync(dir + 'faro-ops.js', 'utf8'))(ctx, chrome, fetch, crypto);
+new Function('self', 'chrome', 'fetch', 'crypto', fs.readFileSync(dir + 'google.js', 'utf8'))(ctx, chrome, fetch, crypto);
+const G = ctx.Google;
+(async () => {
+  await G.guardarClientId('123-abc.apps.googleusercontent.com');
+  const c = await G.config();
+  ok(c.flujoPestana && c.redirect === 'https://farocuali.github.io/Faro/' && c.redirectExtension === '', 'sin identity: usa la página pública como redirección');
+  let e = await G.token().catch(x => x);
+  ok(e.codigo === 'requiere-login' && tabs.length === 0, 'en silencio no abre pestañas');
+  e = await G.token({ interactivo: true }).catch(x => x);
+  const u = new URL(tabs[0]);
+  ok(e.codigo === 'esperando-pestana' && u.searchParams.get('redirect_uri') === 'https://farocuali.github.io/Faro/' && u.searchParams.get('state').startsWith('faro_'), 'interactivo: abre Google en una pestaña con state');
+  const st = u.searchParams.get('state');
+  const scope = encodeURIComponent('openid email https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents');
+  e = await G.recibirDesdePestana(`access_token=MALO&state=faro_otro&expires_in=3600&scope=${scope}`).catch(x => x);
+  ok(e.codigo === 'state-invalido' && !session['google:token'], 'rechaza una respuesta con otro state');
+  await G.token({ interactivo: true }).catch(() => {});
+  const st2 = new URL(tabs[1]).searchParams.get('state');
+  await G.recibirDesdePestana(`access_token=TOKOK&token_type=Bearer&state=${st2}&expires_in=3600&scope=${scope}`);
+  ok((await G.token()) === 'TOKOK' && local['google:email'] === 'mic@gmail.com', 'acepta la respuesta correcta y queda conectada');
+  e = await G.recibirDesdePestana(`access_token=OTRO&state=${st2}&expires_in=3600&scope=${scope}`).catch(x => x);
+  ok(e.codigo === 'state-invalido', 'el mismo state no se puede reutilizar');
+})();

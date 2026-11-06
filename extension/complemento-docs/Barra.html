@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="<?= idioma ?>">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 12px; font: 13px/1.45 "Google Sans", Roboto, Arial, sans-serif; color: #1d2433; background: #fbf8f1; }
+    h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5f6778; margin: 14px 0 6px; }
+    h2:first-child { margin-top: 0; }
+    .sel { background: #fff; border: 1px solid #e2ded4; border-left: 3px solid #e8a33d; border-radius: 6px; padding: 8px 10px; max-height: 120px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .sel.vacia { color: #8a8f9c; font-style: italic; border-left-color: #e2ded4; }
+    .fila { display: flex; gap: 6px; margin-top: 8px; }
+    input[type=text] { flex: 1; min-width: 0; font: inherit; padding: 7px 9px; border: 1px solid #d5d0c4; border-radius: 7px; background: #fff; }
+    input:focus { outline: 2px solid #e8a33d; outline-offset: -1px; }
+    button { font: inherit; font-weight: 600; border-radius: 7px; padding: 7px 12px; cursor: pointer; border: 1px solid #1f3a5f; background: #1f3a5f; color: #fff; }
+    button:disabled { opacity: .45; cursor: default; }
+    label { display: flex; gap: 6px; align-items: center; font-size: 12px; margin-top: 8px; }
+    .msg { margin-top: 8px; padding: 6px 8px; border-radius: 6px; font-size: 12px; }
+    .ok { background: #e3f1e6; color: #1f5c32; }
+    .error { background: #fbe7e3; color: #8c2f1f; }
+    .grupo { margin-bottom: 10px; }
+    .grupo-tit { display: flex; align-items: center; gap: 6px; font-weight: 600; margin-bottom: 4px; }
+    .muestra { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,.15); }
+    .cuenta { color: #5f6778; font-weight: 400; }
+    ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 3px; }
+    li { display: flex; gap: 6px; align-items: flex-start; background: #fff; border: 1px solid #e2ded4; border-radius: 6px; padding: 5px 6px 5px 8px; font-size: 12px; }
+    li .q { flex: 1; min-width: 0; cursor: pointer; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    li .q:hover { color: #1f3a5f; text-decoration: underline; }
+    li .x { background: none; border: 0; color: #8a8f9c; padding: 0 2px; font-size: 15px; line-height: 1; }
+    li .x:hover { color: #8c2f1f; }
+    .vacio { color: #8a8f9c; font-style: italic; }
+    .pie { margin-top: 16px; font-size: 11.5px; color: #5f6778; border-top: 1px solid #e2ded4; padding-top: 10px; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <h2 data-t="sel"></h2>
+  <div id="sel" class="sel vacia"></div>
+  <div class="fila">
+    <input type="text" id="codigo" list="sugerencias" autocomplete="off" spellcheck="false">
+    <datalist id="sugerencias"></datalist>
+    <button id="codificar" disabled></button>
+  </div>
+  <label><input type="checkbox" id="resaltar" checked> <span data-t="resaltar"></span></label>
+  <div id="msg" class="msg" hidden></div>
+
+  <h2 data-t="enDoc"></h2>
+  <div id="lista"></div>
+
+  <p class="pie" data-t="pie"></p>
+
+  <script>
+    var IDIOMA = document.documentElement.lang === 'en' ? 'en' : 'es';
+    var T = {
+      es: {
+        sel: 'Selección', sinSel: 'Seleccioná un fragmento en el Doc.', codigo: 'Código (o varios, con comas)', codificar: 'Codificar',
+        resaltar: 'Resaltar con el color del código', enDoc: 'Codificado en este Doc', nada: 'Todavía no hay fragmentos codificados.',
+        listo: '✓ Codificado como ', quitado: 'Se quitó el código.', quitar: 'Quitar', ir: 'Ver en el Doc',
+        pie: 'Los códigos quedan guardados dentro del Doc. En la extensión FARO, «Sincronizar con el Doc» los trae a tu proyecto.'
+      },
+      en: {
+        sel: 'Selection', sinSel: 'Select a fragment in the Doc.', codigo: 'Code (or several, with commas)', codificar: 'Code',
+        resaltar: 'Highlight with the code colour', enDoc: 'Coded in this Doc', nada: 'No coded fragments yet.',
+        listo: '✓ Coded as ', quitado: 'Code removed.', quitar: 'Remove', ir: 'Show in the Doc',
+        pie: 'Codes are stored inside the Doc. In the FARO extension, “Sync with the Doc” brings them into your project.'
+      }
+    }[IDIOMA];
+
+    var $ = function (id) { return document.getElementById(id); };
+    document.querySelectorAll('[data-t]').forEach(function (el) { el.textContent = T[el.getAttribute('data-t')]; });
+    $('codigo').placeholder = T.codigo;
+    $('codificar').textContent = T.codificar;
+
+    var seleccion = '';
+    var ocupado = false;
+
+    function mensaje(tipo, texto) {
+      var m = $('msg');
+      m.hidden = !texto; m.className = 'msg ' + (tipo || ''); m.textContent = texto || '';
+    }
+
+    function mostrarSeleccion(r) {
+      seleccion = (r && r.texto) || '';
+      var el = $('sel');
+      el.textContent = seleccion || T.sinSel;
+      el.classList.toggle('vacia', !seleccion);
+      $('codificar').disabled = !seleccion || ocupado;
+    }
+
+    // La barra no recibe eventos de selección: consulta cada 1,5 s mientras está visible.
+    function sondear() {
+      if (!document.hidden && !ocupado) google.script.run.withSuccessHandler(mostrarSeleccion).leerSeleccion();
+    }
+    setInterval(sondear, 1500);
+    sondear();
+
+    function pintarLista(r) {
+      var dl = $('sugerencias');
+      dl.innerHTML = '';
+      (r.sugerencias || []).forEach(function (c) { var o = document.createElement('option'); o.value = c; dl.appendChild(o); });
+
+      var cont = $('lista');
+      cont.innerHTML = '';
+      if (!r.fragmentos.length) { var p = document.createElement('p'); p.className = 'vacio'; p.textContent = T.nada; cont.appendChild(p); return; }
+      var grupos = {};
+      r.fragmentos.forEach(function (f) { (grupos[f.codigo] = grupos[f.codigo] || []).push(f); });
+      Object.keys(grupos).sort(function (a, b) { return grupos[b].length - grupos[a].length || a.localeCompare(b); }).forEach(function (codigo) {
+        var g = document.createElement('div'); g.className = 'grupo';
+        var tit = document.createElement('div'); tit.className = 'grupo-tit';
+        var mu = document.createElement('span'); mu.className = 'muestra'; mu.style.background = grupos[codigo][0].color;
+        var nom = document.createElement('span'); nom.textContent = codigo;
+        var cu = document.createElement('span'); cu.className = 'cuenta'; cu.textContent = '· ' + grupos[codigo].length;
+        tit.appendChild(mu); tit.appendChild(nom); tit.appendChild(cu); g.appendChild(tit);
+        var ul = document.createElement('ul');
+        grupos[codigo].forEach(function (f) {
+          var li = document.createElement('li');
+          var q = document.createElement('span'); q.className = 'q'; q.textContent = f.texto; q.title = T.ir;
+          q.addEventListener('click', function () { google.script.run.withFailureHandler(function (e) { mensaje('error', e.message); }).irA(f.id); });
+          var x = document.createElement('button'); x.className = 'x'; x.textContent = '×'; x.title = T.quitar; x.setAttribute('aria-label', T.quitar + ' ' + codigo);
+          x.addEventListener('click', function () {
+            google.script.run.withSuccessHandler(function (r2) { pintarLista(r2); mensaje('ok', T.quitado); })
+              .withFailureHandler(function (e) { mensaje('error', e.message); }).quitar(f.id);
+          });
+          li.appendChild(q); li.appendChild(x); ul.appendChild(li);
+        });
+        g.appendChild(ul); cont.appendChild(g);
+      });
+    }
+
+    function codificar() {
+      var codigos = $('codigo').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      if (!codigos.length || !seleccion) return;
+      ocupado = true; $('codificar').disabled = true;
+      google.script.run
+        .withSuccessHandler(function (r) {
+          ocupado = false; pintarLista(r); $('codigo').value = '';
+          mensaje('ok', T.listo + codigos.map(function (c) { return '«' + c + '»'; }).join(', '));
+          mostrarSeleccion({ texto: seleccion });
+        })
+        .withFailureHandler(function (e) { ocupado = false; mostrarSeleccion({ texto: seleccion }); mensaje('error', e.message); })
+        .codificar(codigos, $('resaltar').checked);
+    }
+
+    $('codificar').addEventListener('click', codificar);
+    $('codigo').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); codificar(); } });
+    google.script.run.withSuccessHandler(pintarLista).listar();
+  </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_nombre__",
+  "version": "1.4.0",
+  "description": "__MSG_descripcion__",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7M7QRmVHEJD5wTlq/XU5yPaSEJqXzcT+lQDEc1wMfoLADD/v6tNYkURQwJ9Lx1WS4KATIYEu8/1PECPvD92HGtcii1giY238jUZSTtFY+RYmtstkAk7wF3dFvbZSPXIrTOwxzM5eWhWkX8psVKoGnI/5mDN65UV9DSpEgtIErcsedGdE01ZXDo1X/bD5z81sFe4yG0WWnViD8dgMnLYEIRtVDxbI5QYQ8ZC/0Z5drRFXVCR5YXwooRFxrZKIv3fahsH49RoJMtdopfVPQGvTVkIvh8ovrfu3XHpsUjDkuhcI2FTsZ7hAHGE0sX+smv8gkL9E/wz6yPP0oBeF/zaVlwIDAQAB",
+  "permissions": [
+    "contextMenus",
+    "sidePanel",
+    "storage",
+    "unlimitedStorage",
+    "activeTab",
+    "scripting",
+    "identity",
+    "offscreen",
+    "clipboardRead"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.crossref.org/*",
+    "https://www.googleapis.com/*",
+    "https://docs.googleapis.com/*",
+    "https://openidconnect.googleapis.com/*",
+    "https://oauth2.googleapis.com/*",
+    "https://docs.google.com/*",
+    "https://*.googleusercontent.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "__MSG_titulo_accion__",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://docs.google.com/document/*"
+      ],
+      "js": [
+        "i18n.js",
+        "docs-content.js"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://farocuali.github.io/Faro/*"
+      ],
+      "js": [
+        "oauth-content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/icon48.png"
+      ],
+      "matches": [
+        "https://docs.google.com/*"
+      ]
+    }
+  ],
+  "commands": {
+    "capturar": {
+      "suggested_key": {
+        "default": "Alt+Shift+F",
+        "mac": "Alt+Shift+F"
+      },
+      "description": "__MSG_atajo__"
+    }
+  },
+  "default_locale": "es"
+}

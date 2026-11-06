@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es" data-i18n-lang>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FARO · Captura</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="cabecera">
+    <div class="marca">
+      <img src="icons/icon48.png" alt="" width="24" height="24">
+      <h1>FARO</h1>
+      <span id="contador" class="contador"></span>
+      <button id="abrir-faro" type="button" class="boton-faro" title="Abrir FARO completo en una pestaña">Abrir FARO ↗</button>
+    </div>
+    <nav class="pestanas" role="tablist" aria-label="Secciones">
+      <button type="button" role="tab" id="tab-fragmentos" aria-controls="vista-fragmentos" aria-selected="true">Fragmentos</button>
+      <button type="button" role="tab" id="tab-biblio" aria-controls="vista-biblio" aria-selected="false">Bibliografía</button>
+    </nav>
+  </header>
+
+  <!-- ===================== FRAGMENTOS ===================== -->
+  <div id="vista-fragmentos" class="vista" role="tabpanel" aria-labelledby="tab-fragmentos">
+    <div class="herramientas">
+      <input id="filtro" type="search" placeholder="Buscar en fragmentos, códigos y memos" aria-label="Buscar">
+      <nav id="codigos" class="codigos" aria-label="Filtrar por código"></nav>
+    </div>
+
+    <main>
+      <section id="vacio" class="vacio" hidden>
+        <p class="vacio-titulo">Todavía no hay fragmentos.</p>
+        <p data-i18n-html>Seleccioná texto en cualquier página y hacé <strong>clic derecho → Enviar a FARO</strong>, o usá <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>.</p>
+      </section>
+      <p id="sin-resultados" class="vacio" hidden>Ningún fragmento coincide con el filtro.</p>
+      <ol id="lista" class="lista"></ol>
+    </main>
+
+    <footer class="pie">
+      <button id="pasar-faro" type="button" class="boton">Pasar a FARO</button>
+      <button id="exportar" type="button" class="boton boton-secundario">JSON</button>
+      <button id="borrar-todo" type="button" class="boton boton-peligro">Borrar todo</button>
+    </footer>
+  </div>
+
+  <!-- ===================== BIBLIOGRAFÍA ===================== -->
+  <div id="vista-biblio" class="vista" role="tabpanel" aria-labelledby="tab-biblio" hidden>
+    <main class="biblio">
+      <details id="b-config" class="config">
+        <summary>Configuración de Gemini</summary>
+        <p class="ayuda" data-i18n-html>FARO usa tu propia clave de Gemini (gratis). Sacala en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">aistudio.google.com/apikey</a>. Queda guardada solo en este navegador.</p>
+        <label class="etiqueta" for="b-clave">Clave de API</label>
+        <input id="b-clave" class="campo" type="password" autocomplete="off" spellcheck="false" placeholder="AIza…">
+        <label class="etiqueta" for="b-modelo">Modelo</label>
+        <input id="b-modelo" class="campo" type="text" list="b-modelos" spellcheck="false">
+        <datalist id="b-modelos">
+          <option value="gemini-2.5-flash">
+          <option value="gemini-2.5-flash-lite">
+          <option value="gemini-2.5-pro">
+        </datalist>
+        <p class="ayuda">Para búsqueda web gratis usá Flash o Flash-Lite. En Pro la búsqueda web no entra en el plan gratuito.</p>
+        <button id="b-guardar-config" type="button" class="boton">Guardar</button>
+        <span id="b-config-estado" class="ayuda" role="status"></span>
+      </details>
+
+      <div id="b-origen" class="origen" hidden>
+        <span><span data-i18n>Desde el fragmento de</span> <strong id="b-origen-fuente"></strong></span>
+      </div>
+
+      <label class="etiqueta" for="b-consulta">¿Sobre qué tema buscás bibliografía?</label>
+      <textarea id="b-consulta" class="campo" rows="5" placeholder="Describí el tema en el que estás trabajando…"></textarea>
+
+      <label class="interruptor">
+        <input id="b-web" type="checkbox" checked>
+        Buscar en la web para verificar cada obra (recomendado)
+      </label>
+
+      <div class="acciones">
+        <button id="b-buscar" type="button" class="boton">Buscar bibliografía</button>
+        <button id="b-detener" type="button" class="boton boton-secundario" hidden>Detener</button>
+      </div>
+
+      <p id="b-cargando" class="cargando" hidden role="status">Buscando y verificando en la web…</p>
+      <div id="b-aviso" class="aviso" hidden role="alert"></div>
+
+      <section id="b-resultado" class="resultado" hidden>
+        <div id="b-salida" class="md"></div>
+        <p id="b-leyenda" class="ayuda" hidden>✓ = la obra figura en CrossRef con ese título y autor/a. Que no figure no significa que no exista: muchos libros y revistas latinoamericanas no tienen DOI. Revisá siempre con las fuentes.</p>
+        <div id="b-fuentes-caja" class="tarjeta" hidden>
+          <div class="tarjeta-titulo">Fuentes consultadas en la web</div>
+          <ol id="b-fuentes" class="fuentes"></ol>
+        </div>
+        <div id="b-sugerencias-caja" hidden>
+          <p class="ayuda">Sugerencias de búsqueda de Google (se muestran tal cual, como exigen sus términos):</p>
+          <div id="b-sugerencias"></div>
+        </div>
+        <button id="b-copiar" type="button" class="boton boton-secundario">Copiar resultado</button>
+      </section>
+
+      <details id="b-historial-caja" class="historial" hidden>
+        <summary>Búsquedas anteriores</summary>
+        <ol id="b-historial"></ol>
+      </details>
+    </main>
+  </div>
+
+  <template id="plantilla-captura">
+    <li class="captura">
+      <blockquote class="texto"></blockquote>
+      <div class="meta">
+        <a class="fuente" target="_blank" rel="noopener noreferrer"></a>
+        <time class="fecha"></time>
+      </div>
+      <div class="chips"></div>
+      <span class="en-faro" hidden>En FARO ✓</span>
+      <input class="campo" data-campo="codigo" type="text" placeholder="Agregar código (Enter; varios con comas)" aria-label="Agregar código">
+      <textarea class="campo memo" data-campo="memo" rows="2" placeholder="Memo analítico" aria-label="Memo"></textarea>
+      <button type="button" class="enlace-accion" data-accion="biblio">Buscar bibliografía sobre este fragmento →</button>
+      <button type="button" class="borrar" data-accion="borrar" aria-label="Borrar fragmento" title="Borrar fragmento">×</button>
+    </li>
+  </template>
+
+  <script src="i18n.js"></script>
+  <script src="faro-ops.js"></script>
+  <script src="prompts.js"></script>
+  <script src="sidepanel.js"></script>
+  <script src="biblio.js"></script>
+</body>
+</html>
