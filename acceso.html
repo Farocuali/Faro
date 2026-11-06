@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>FARO · Dar acceso a un Doc</title>
+  <!--
+    Página pública de FARO (se publica en https://farocuali.github.io/Faro/acceso.html).
+    La abre la extensión FARO para que la persona le dé acceso a UN Google Doc con el selector oficial de Google.
+    Así FARO usa el permiso por archivo (drive.file): solo ve los Docs que la persona elige acá.
+    Parámetros (en el fragmento #, que no se envía a ningún servidor): doc, cliente (Client ID), clave (clave de API
+    del selector), idioma, cuenta (opcional). Basado en el ejemplo oficial de Google (Apache 2.0):
+    https://developers.google.com/workspace/drive/picker/guides/sample
+  -->
+  <style>
+    :root { --fondo:#fbf8f1; --texto:#1d2433; --suave:#5f6778; --borde:#e2ded4; --acento:#1f3a5f; --luz:#e8a33d; --ok:#1f5c32; --okf:#e3f1e6; --err:#8c2f1f; --errf:#fbe7e3; }
+    @media (prefers-color-scheme: dark) { :root { --fondo:#12161e; --texto:#e8e6e1; --suave:#9aa1b0; --borde:#2c3442; --acento:#8fb3e0; --luz:#f0b357; --ok:#9fd8ae; --okf:#1f3a29; --err:#e07a68; --errf:#3a221e; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fondo); color: var(--texto); font: 17px/1.6 Georgia, "Times New Roman", serif; }
+    main { max-width: 560px; margin: 0 auto; padding: 56px 20px; text-align: center; }
+    img { width: 72px; height: 72px; }
+    h1 { color: var(--acento); font-size: 28px; margin: 12px 0 8px; }
+    p { color: var(--suave); margin: 8px 0; }
+    button { font: 600 16px system-ui, sans-serif; border-radius: 10px; padding: 12px 22px; cursor: pointer; border: 1px solid var(--acento); background: var(--acento); color: var(--fondo); margin-top: 18px; }
+    button:disabled { opacity: .5; cursor: default; }
+    .estado { margin-top: 20px; padding: 10px 14px; border-radius: 8px; font: 15px system-ui, sans-serif; }
+    .ok { background: var(--okf); color: var(--ok); }
+    .error { background: var(--errf); color: var(--err); }
+    .nota { font-size: 14px; margin-top: 28px; border-top: 1px solid var(--borde); padding-top: 16px; }
+    a { color: var(--acento); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+<main>
+  <div style="font-size:56px;line-height:1">🔦</div>
+  <h1 id="titulo"></h1>
+  <p id="explicacion"></p>
+  <button id="elegir" disabled></button>
+  <div id="estado" class="estado" hidden role="status"></div>
+  <p class="nota" id="nota"></p>
+</main>
+<script>
+(function () {
+  "use strict";
+  var p = new URLSearchParams(location.hash.slice(1));
+  var doc = p.get("doc") || "", cliente = p.get("cliente") || "", clave = p.get("clave") || "", cuenta = p.get("cuenta") || "";
+  var es = (p.get("idioma") || navigator.language || "es").toLowerCase().indexOf("es") === 0;
+  var T = es ? {
+    titulo: "Dar acceso a FARO a este Doc",
+    explicacion: "Para guardar los códigos dentro del documento, FARO necesita tu permiso para este Doc en particular. Se abre el selector de Google mostrando solo ese documento: elegilo y tocá «Seleccionar».",
+    elegir: "Elegir el Doc", cargando: "Cargando…",
+    listo: "✓ Listo: FARO ya puede guardar los códigos en este Doc. Esta pestaña se cierra sola; si no, cerrala y volvé al Doc.",
+    otro: "Elegiste otro documento. Elegí el que estabas codificando.",
+    cancelado: "No elegiste ningún documento. Podés volver a intentarlo.",
+    error: "Algo falló: ",
+    faltan: "Faltan datos en el enlace. Abrí esta página desde el botón de FARO en tu Doc.",
+    nota: "FARO solo puede ver los Docs que elegís acá y los archivos que crea en tu carpeta FARO de Drive. No ve el resto de tu Drive."
+  } : {
+    titulo: "Give FARO access to this Doc",
+    explicacion: "To store codes inside the document, FARO needs your permission for this particular Doc. Google's picker opens showing only that document: pick it and click “Select”.",
+    elegir: "Choose the Doc", cargando: "Loading…",
+    listo: "✓ Done: FARO can now store codes in this Doc. This tab closes by itself; if it doesn't, close it and go back to the Doc.",
+    otro: "You chose another document. Choose the one you were coding.",
+    cancelado: "You didn't choose a document. You can try again.",
+    error: "Something went wrong: ",
+    faltan: "The link is missing data. Open this page from the FARO button in your Doc.",
+    nota: "FARO can only see the Docs you choose here and the files it creates in your FARO Drive folder. It can't see the rest of your Drive."
+  };
+  document.documentElement.lang = es ? "es" : "en";
+  document.title = "FARO · " + T.titulo;
+  var $ = function (id) { return document.getElementById(id); };
+  $("titulo").textContent = T.titulo;
+  $("explicacion").textContent = T.explicacion;
+  $("nota").textContent = T.nota;
+  var boton = $("elegir");
+  boton.textContent = T.cargando;
+
+  function estado(tipo, texto) { var e = $("estado"); e.hidden = !texto; e.className = "estado " + tipo; e.textContent = texto; }
+
+  var valido = /^[\w-]{5,}$/.test(doc) && /^\d+-[\w.-]+\.apps\.googleusercontent\.com$/.test(cliente) && /^AIza[\w-]{20,}$/.test(clave);
+  if (!valido) { estado("error", T.faltan); return; }
+  var proyecto = cliente.split("-")[0]; // número del proyecto de Google Cloud (lo exige setAppId para drive.file)
+
+  var token = null, clienteToken = null, pickerListo = false, gisListo = false;
+  function habilitar() { if (pickerListo && gisListo) { boton.disabled = false; boton.textContent = T.elegir; } }
+
+  function cargar(src, alListo) {
+    var s = document.createElement("script");
+    s.src = src; s.async = true; s.defer = true; s.onload = alListo;
+    s.onerror = function () { estado("error", T.error + src); };
+    document.body.appendChild(s);
+  }
+  cargar("https://apis.google.com/js/api.js", function () { gapi.load("picker", function () { pickerListo = true; habilitar(); }); });
+  cargar("https://accounts.google.com/gsi/client", function () {
+    clienteToken = google.accounts.oauth2.initTokenClient({
+      client_id: cliente,
+      scope: "https://www.googleapis.com/auth/drive.file",
+      login_hint: cuenta || undefined,
+      callback: function (r) {
+        if (r.error) { estado("error", T.error + r.error); return; }
+        token = r.access_token;
+        mostrarSelector();
+      }
+    });
+    gisListo = true; habilitar();
+  });
+
+  function mostrarSelector() {
+    var vista = new google.picker.DocsView(google.picker.ViewId.DOCUMENTS).setFileIds(doc).setMode(google.picker.DocsViewMode.LIST);
+    new google.picker.PickerBuilder()
+      .addView(vista)
+      .setOAuthToken(token)
+      .setDeveloperKey(clave)
+      .setAppId(proyecto)
+      .setLocale(es ? "es" : "en")
+      .setTitle(T.titulo)
+      .setCallback(alElegir)
+      .build()
+      .setVisible(true);
+  }
+
+  function alElegir(data) {
+    var accion = data[google.picker.Response.ACTION];
+    if (accion === google.picker.Action.CANCEL) { estado("error", T.cancelado); return; }
+    if (accion !== google.picker.Action.PICKED) return;
+    var elegidos = (data[google.picker.Response.DOCUMENTS] || []).map(function (d) { return d[google.picker.Document.ID]; });
+    if (elegidos.indexOf(doc) === -1) { estado("error", T.otro); return; }
+    estado("ok", T.listo);
+    boton.hidden = true;
+    location.hash = "faro-acceso-ok=" + doc; // la extensión lo detecta, cierra la pestaña y le avisa al Doc
+  }
+
+  boton.addEventListener("click", function () {
+    estado("", "");
+    if (token) { mostrarSelector(); return; }
+    clienteToken.requestAccessToken({ prompt: "" });
+  });
+})();
+</script>
+</body>
+</html>

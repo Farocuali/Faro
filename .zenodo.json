@@ -1,0 +1,33 @@
+{
+  "title": "FARO: Fichero Analítico de Registro y Observación",
+  "upload_type": "software",
+  "description": "<p>FARO is a free, browser-based tool for qualitative and ethnographic research: coding field notes, interviews and documents, thick description, code networks, citation management and bibliography recommendation. The browser extension codes directly in Google Docs (codes stored inside the document as named ranges), captures web content for digital ethnography and computes inter-coder agreement (Cohen's kappa and Krippendorff's alpha).</p>",
+  "creators": [
+    {
+      "name": "Gueler, Micaela",
+      "affiliation": "Escuela IDAES, Universidad Nacional de San Martín"
+    },
+    {
+      "name": "Wegman, Rocío",
+      "affiliation": "Escuela IDAES, Universidad Nacional de San Martín"
+    }
+  ],
+  "license": "MIT",
+  "language": "spa",
+  "keywords": [
+    "qualitative research",
+    "qualitative data analysis",
+    "ethnography",
+    "CAQDAS",
+    "inter-coder agreement",
+    "Google Docs",
+    "browser extension"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://farocuali.github.io/Faro/",
+      "relation": "isDocumentedBy",
+      "resource_type": "other"
+    }
+  ]
+}

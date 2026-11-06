@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FARO · Política de privacidad / Privacy policy</title>
+  <style>
+    :root { --fondo:#fbf8f1; --texto:#1d2433; --suave:#5f6778; --borde:#e2ded4; --acento:#1f3a5f; --luz:#e8a33d; }
+    @media (prefers-color-scheme: dark) { :root { --fondo:#12161e; --texto:#e8e6e1; --suave:#9aa1b0; --borde:#2c3442; --acento:#8fb3e0; --luz:#f0b357; } }
+    body { margin: 0; background: var(--fondo); color: var(--texto); font: 16px/1.65 Georgia, "Times New Roman", serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 40px 20px 80px; }
+    h1 { color: var(--acento); font-size: 30px; margin: 0 0 4px; }
+    h2 { font: 600 19px/1.3 system-ui, sans-serif; margin: 30px 0 8px; }
+    .fecha { color: var(--suave); margin: 0 0 24px; }
+    .idiomas { font: 14px system-ui, sans-serif; margin-bottom: 24px; }
+    .idiomas a { color: var(--acento); margin-right: 12px; }
+    table { border-collapse: collapse; width: 100%; font-size: 15px; }
+    th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--borde); padding: 8px 6px; }
+    .destacado { border-left: 3px solid var(--luz); padding: 6px 0 6px 14px; }
+    hr { border: 0; border-top: 1px solid var(--borde); margin: 56px 0; }
+    a { color: var(--acento); }
+  </style>
+</head>
+<body>
+<main>
+  <nav class="idiomas"><a href="#es">Español</a><a href="#en">English</a></nav>
+
+  <section id="es" lang="es">
+    <h1>Política de privacidad de FARO</h1>
+    <p class="fecha">Vigente desde el 4 de noviembre de 2026 · Aplica a FARO web, la extensión de navegador FARO y el complemento FARO para Google Docs.</p>
+
+    <h2>En pocas palabras</h2>
+    <p>FARO no tiene servidores propios, cuentas de usuario, publicidad ni analítica. Tu proyecto se guarda en tu navegador y, si lo elegís, en tu propio Google Drive. Solo se envían datos a servicios de terceros cuando usás una función que los necesita, y siempre directamente desde tu navegador.</p>
+
+    <h2>Qué datos se usan y para qué</h2>
+    <table>
+      <tr><th>Dato</th><th>Para qué</th><th>Dónde queda</th></tr>
+      <tr><td>Materiales, códigos, análisis, memos y referencias de tu proyecto</td><td>Que FARO funcione</td><td>En tu navegador (almacenamiento local). En tu Drive solo si activás «Guardar en Drive».</td></tr>
+      <tr><td>Texto de los Google Docs que codificás</td><td>Importarlos como material, ubicar los fragmentos codificados y resaltarlos</td><td>En tu navegador y en el propio Doc (los códigos se guardan como «rangos con nombre» del documento).</td></tr>
+      <tr><td>Fragmentos que capturás de páginas web, con su dirección y fecha</td><td>Codificarlos y citarlos</td><td>En tu navegador.</td></tr>
+      <tr><td>Tu correo de Google y un permiso temporal de acceso (token)</td><td>Mostrar qué cuenta está conectada y usar Drive y Docs en tu nombre</td><td>El correo, en tu navegador; el token, solo en la memoria de la sesión (se borra al cerrar el navegador o al desconectar).</td></tr>
+      <tr><td>Tu clave de Gemini y las consultas de IA que pedís</td><td>Funciones de IA opcionales</td><td>La clave, en tu navegador (nunca en los respaldos). Las consultas van a Google (Gemini) según sus términos.</td></tr>
+      <tr><td>Títulos y autores de obras recomendadas</td><td>Verificarlas en CrossRef</td><td>No se guardan.</td></tr>
+    </table>
+
+    <h2>Datos de Google (Google Docs y Drive)</h2>
+    <p class="destacado">El uso y la transferencia a cualquier otra aplicación de la información recibida de las APIs de Google por parte de FARO se ajustan a la <a href="https://developers.google.com/terms/api-services-user-data-policy">Política de datos de usuario de los servicios de las API de Google</a>, incluidos los requisitos de Uso Limitado.</p>
+    <ul>
+      <li><b>Drive</b> (<code>drive.file</code>): FARO solo accede a los archivos que él mismo crea (la carpeta «FARO», los respaldos del proyecto y los Docs de resultados) y a los que vos elegís. No puede ver el resto de tu Drive.</li>
+      <li><b>Docs</b>: con el mismo permiso por archivo (<code>drive.file</code>), FARO solo puede abrir los Docs a los que le das acceso explícitamente con el selector de Google. En ellos lee el texto y escribe los códigos (rangos con nombre) y el resaltado. Solo actúa cuando lo pedís.</li>
+      <li>El complemento para Google Docs usa <code>documents.currentonly</code>: solo el documento abierto.</li>
+      <li>FARO no vende los datos de Google, no los usa para publicidad y no los transfiere a terceros. FARO no tiene servidores: ninguna persona del equipo de FARO los ve.</li>
+      <li>Excepción que decidís vos: si usás una función de IA de FARO sobre un material que vino de un Google Doc, ese texto se envía a Gemini con tu propia clave, solo para darte el resultado que pediste. Con una clave gratuita, según los términos de Google, Google puede usar lo que se envía para mejorar sus productos; si no querés eso, no uses la IA con ese material o usá una clave con facturación.</li>
+    </ul>
+
+    <h2>Servicios de terceros</h2>
+    <p>Según las funciones que uses, tu navegador se conecta con: Google (Docs, Drive, inicio de sesión y Gemini), CrossRef, DataCite, doi.org, Open Library, Google Books y Zotero. Cada uno tiene su propia política de privacidad.</p>
+
+    <h2>Tus derechos y cómo borrar todo</h2>
+    <ul>
+      <li>Borrar el proyecto: en FARO, Configuración → borrar todos los datos; o desinstalá la extensión.</li>
+      <li>Quitar el acceso de Google: botón G de FARO → desconectar, o en <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+      <li>Los respaldos que descargaste o guardaste en Drive quedan bajo tu control: borralos vos.</li>
+    </ul>
+
+    <h2>Menores</h2>
+    <p>FARO está pensado para personas adultas que hacen investigación. Las funciones de IA requieren tener 18 años o más, según los términos de Google.</p>
+
+    <h2>Contacto</h2>
+    <p>Micaela Gueler y Rocío Wegman · <a href="mailto:Faro.cuali@gmail.com">Faro.cuali@gmail.com</a>. Si esta política cambia, se actualiza la fecha de arriba.</p>
+  </section>
+
+  <hr>
+
+  <section id="en" lang="en">
+    <h1>FARO privacy policy</h1>
+    <p class="fecha">Effective 4 November 2026 · Applies to FARO web, the FARO browser extension and the FARO add-on for Google Docs.</p>
+
+    <h2>In short</h2>
+    <p>FARO has no servers of its own, no user accounts, no ads and no analytics. Your project is stored in your browser and, if you choose, in your own Google Drive. Data is only sent to third-party services when you use a feature that needs them, and always directly from your browser.</p>
+
+    <h2>What data is used and why</h2>
+    <table>
+      <tr><th>Data</th><th>Purpose</th><th>Where it stays</th></tr>
+      <tr><td>Your project's materials, codes, analyses, memos and references</td><td>Making FARO work</td><td>In your browser (local storage). In your Drive only if you turn on “Save to Drive”.</td></tr>
+      <tr><td>Text of the Google Docs you code</td><td>Importing them as materials, locating coded fragments and highlighting them</td><td>In your browser and in the Doc itself (codes are stored as the document's “named ranges”).</td></tr>
+      <tr><td>Fragments you capture from web pages, with their address and date</td><td>Coding and citing them</td><td>In your browser.</td></tr>
+      <tr><td>Your Google email and a temporary access token</td><td>Showing which account is connected and using Drive and Docs on your behalf</td><td>The email, in your browser; the token, only in session memory (deleted when you close the browser or disconnect).</td></tr>
+      <tr><td>Your Gemini key and the AI requests you make</td><td>Optional AI features</td><td>The key, in your browser (never in backups). Requests go to Google (Gemini) under its terms.</td></tr>
+      <tr><td>Titles and authors of recommended works</td><td>Verifying them in CrossRef</td><td>Not stored.</td></tr>
+    </table>
+
+    <h2>Google user data (Google Docs and Drive)</h2>
+    <p class="destacado">FARO's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+    <ul>
+      <li><b>Drive</b> (<code>drive.file</code>): FARO only accesses the files it creates (the “FARO” folder, project backups and result Docs) and the ones you choose. It cannot see the rest of your Drive.</li>
+      <li><b>Docs</b>: with the same per-file permission (<code>drive.file</code>), FARO can only open the Docs you explicitly give it access to with Google's picker. In them it reads the text and writes the codes (named ranges) and highlighting. It only acts when you ask.</li>
+      <li>The Google Docs add-on uses <code>documents.currentonly</code>: only the open document.</li>
+      <li>FARO does not sell Google user data, use it for advertising or transfer it to third parties. FARO has no servers: no one on the FARO team sees it.</li>
+      <li>An exception you control: if you use a FARO AI feature on a material that came from a Google Doc, that text is sent to Gemini with your own key, only to give you the result you asked for. With a free key, under Google's terms, Google may use what is sent to improve its products; if you don't want that, don't use AI on that material or use a billed key.</li>
+    </ul>
+
+    <h2>Third-party services</h2>
+    <p>Depending on the features you use, your browser connects to: Google (Docs, Drive, sign-in and Gemini), CrossRef, DataCite, doi.org, Open Library, Google Books and Zotero. Each has its own privacy policy.</p>
+
+    <h2>Your rights and how to delete everything</h2>
+    <ul>
+      <li>Delete the project: in FARO, Settings → delete all data; or uninstall the extension.</li>
+      <li>Remove Google access: FARO's G button → disconnect, or at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+      <li>Backups you downloaded or saved to Drive are under your control: delete them yourself.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <p>FARO is meant for adults doing research. AI features require being 18 or older, under Google's terms.</p>
+
+    <h2>Contact</h2>
+    <p>Micaela Gueler and Rocío Wegman · <a href="mailto:Faro.cuali@gmail.com">Faro.cuali@gmail.com</a>. If this policy changes, the date above is updated.</p>
+  </section>
+</main>
+</body>
+</html>
