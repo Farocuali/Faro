@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FARO · Extensión para el navegador / Browser extension</title>
+  <meta name="description" content="Extensión gratuita de FARO: codificá en Google Docs, capturá páginas web y usá FARO completo en tu navegador.">
+  <style>
+    :root { --fondo:#fbf8f1; --texto:#1d2433; --suave:#5f6778; --borde:#e2ded4; --acento:#1f3a5f; --luz:#e8a33d; --caja:#f3efe5; }
+    @media (prefers-color-scheme: dark) { :root { --fondo:#12161e; --texto:#e8e6e1; --suave:#9aa1b0; --borde:#2c3442; --acento:#8fb3e0; --luz:#f0b357; --caja:#1a202b; } }
+    body { margin: 0; background: var(--fondo); color: var(--texto); font: 16px/1.65 Georgia, "Times New Roman", serif; }
+    main { max-width: 780px; margin: 0 auto; padding: 40px 20px 80px; }
+    h1 { color: var(--acento); font-size: 32px; margin: 0 0 6px; }
+    h2 { font: 600 20px/1.3 system-ui, sans-serif; margin: 36px 0 10px; }
+    h3 { font: 600 16px/1.3 system-ui, sans-serif; margin: 20px 0 6px; }
+    .bajada { color: var(--suave); margin: 0 0 24px; font-size: 18px; }
+    .idiomas, .volver { font: 14px system-ui, sans-serif; }
+    .idiomas { margin-bottom: 24px; }
+    .idiomas a { color: var(--acento); margin-right: 12px; }
+    .tiendas { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 6px; }
+    .tienda { font: 600 15px system-ui, sans-serif; padding: 10px 16px; border-radius: 10px; text-decoration: none; border: 1px solid var(--acento); color: var(--acento); }
+    a.tienda { background: var(--acento); color: var(--fondo); }
+    span.tienda { opacity: .6; }
+    .tienda small { font-weight: 400; display: block; font-size: 12px; }
+    .nota { font: 14px/1.5 system-ui, sans-serif; color: var(--suave); }
+    .caja { background: var(--caja); border-radius: 12px; padding: 4px 18px 10px; margin: 14px 0; }
+    .destacado { border-left: 3px solid var(--luz); padding: 6px 0 6px 14px; }
+    table { border-collapse: collapse; width: 100%; font-size: 15px; }
+    th, td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--borde); padding: 8px 6px; }
+    ol li, ul li { margin: 4px 0; }
+    kbd { font: 13px ui-monospace, monospace; border: 1px solid var(--borde); border-radius: 4px; padding: 0 4px; }
+    code { font-size: 14px; }
+    details { border-bottom: 1px solid var(--borde); padding: 8px 0; }
+    summary { cursor: pointer; font: 600 15px system-ui, sans-serif; }
+    hr { border: 0; border-top: 1px solid var(--borde); margin: 64px 0; }
+    a { color: var(--acento); }
+  </style>
+</head>
+<body>
+<main>
+  <nav class="idiomas"><a href="#es">Español</a><a href="#en">English</a><a href="./">← FARO web</a></nav>
+
+  <!-- ============================== ESPAÑOL ============================== -->
+  <section id="es" lang="es">
+    <h1>Extensión FARO</h1>
+    <p class="bajada">FARO completo en tu navegador, más codificar dentro de Google Docs y capturar páginas web. Gratis, sin cuentas y sin servidores.</p>
+
+    <h2>Instalarla</h2>
+    <div class="tiendas" data-tiendas>
+      <!-- Cuando haya enlace, reemplazar el <span> por <a class="tienda" href="URL">. -->
+      <span class="tienda" data-tienda="firefox">Firefox<small>Próximamente</small></span>
+      <span class="tienda" data-tienda="edge">Microsoft Edge<small>Próximamente</small></span>
+    </div>
+    <p class="nota">Funciona en computadora (Windows, Mac, Linux) y en Firefox para Android. Mientras no esté en las tiendas, se puede probar instalándola a mano (ver «Instalarla a mano», más abajo).</p>
+
+    <h2>¿En qué se diferencia de FARO web?</h2>
+    <table>
+      <tr><th></th><th>FARO web</th><th>Extensión FARO</th></tr>
+      <tr><td>Cómo se usa</td><td>Abrís <a href="./">farocuali.github.io/Faro</a></td><td>Se instala una vez en el navegador</td></tr>
+      <tr><td>Análisis completo (códigos, memos, redes, citas, bibliografía)</td><td>Sí</td><td>Sí</td></tr>
+      <tr><td>Codificar dentro de Google Docs</td><td>No</td><td>Sí</td></tr>
+      <tr><td>Capturar fragmentos de páginas web</td><td>No</td><td>Sí</td></tr>
+      <tr><td>Guardar en Drive y crear Google Docs con resultados</td><td>No</td><td>Sí (opcional)</td></tr>
+      <tr><td>Acuerdo entre codificadoras, saturación, anexo de codificación</td><td>No</td><td>Sí</td></tr>
+    </table>
+    <p class="nota">Cada una guarda su propio proyecto en el navegador. Para pasar un proyecto de la web a la extensión, mirá «Pasar mi proyecto de FARO web» más abajo.</p>
+
+    <h2>Primeros pasos</h2>
+    <h3>1. Abrir FARO completo</h3>
+    <p>Hacé <b>clic derecho</b> en el ícono del faro, en la barra del navegador → <b>Abrir FARO</b>. Se abre en una pestaña propia. Con un clic normal se abre el panel lateral, con las capturas web y la bibliografía.</p>
+
+    <h3>2. Conectar Google (opcional)</h3>
+    <p>En FARO, tocá el botón <b>G</b> (arriba a la derecha) → <b>Conectar con Google</b> y elegí tu cuenta. Así los códigos se guardan dentro de tus Docs y podés respaldar el proyecto en tu Drive. Sin conectar Google, FARO funciona igual, pero los códigos quedan solo en FARO.</p>
+
+    <h3>3. Codificar en Google Docs</h3>
+    <ol>
+      <li>Abrí cualquier Google Doc: abajo a la derecha aparece el botón <b>FARO</b>.</li>
+      <li>La primera vez, con Google conectado, el panel te ofrece <b>Dar acceso a FARO a este Doc</b>: se abre el selector de Google, elegís ese documento y listo. Se hace una vez por Doc.</li>
+      <li>Seleccioná un fragmento, copialo (<kbd>Ctrl</kbd>+<kbd>C</kbd>) y escribí el código en el panel. Queda resaltado con el color del código.</li>
+      <li>Atajos: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>1…9</kbd> aplican tus códigos favoritos. Con el botón ✎ escribís un memo sobre el fragmento.</li>
+      <li>En FARO, <b>Sincronizar con el Doc</b> trae todo lo codificado a tu proyecto.</li>
+    </ol>
+
+    <h3>4. Capturar páginas web (etnografía digital)</h3>
+    <p>Seleccioná un texto en cualquier página → clic derecho → <b>Enviar a FARO</b> (o <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>). Se guarda con la dirección y la fecha, para citarlo. Lo codificás desde el panel lateral y lo pasás al proyecto.</p>
+
+    <h3>5. Citar en tu tesis</h3>
+    <p>En el panel de Docs, <b>Citar en tu texto</b>: elegís un código y copiás cualquiera de sus fragmentos como cita lista para pegar, con su fuente y fecha (y con seudónimos, si los cargaste).</p>
+
+    <h2>Pasar mi proyecto de FARO web a la extensión</h2>
+    <ol>
+      <li>En FARO web: <b>Respaldar / Descargar datos</b>. Se descarga un archivo <code>.json</code>.</li>
+      <li>En la extensión: abrí FARO completo → <b>Importar respaldo</b> y elegí ese archivo.</li>
+    </ol>
+
+    <h2>Instalarla a mano (para probar)</h2>
+    <div class="caja">
+      <h3>Chrome, Edge o Brave</h3>
+      <ol>
+        <li>Descargá y descomprimí el paquete de FARO para Chrome.</li>
+        <li>Abrí <code>chrome://extensions</code> (en Edge: <code>edge://extensions</code>; en Brave: <code>brave://extensions</code>).</li>
+        <li>Activá el <b>Modo de desarrollador</b> → <b>Cargar descomprimida</b> → elegí la carpeta <code>faro</code>.</li>
+        <li>No borres ni muevas esa carpeta: el navegador usa la extensión desde ahí.</li>
+      </ol>
+      <h3>Firefox</h3>
+      <ol>
+        <li>Abrí <code>about:debugging#/runtime/this-firefox</code> → <b>Cargar complemento temporal…</b> → elegí <code>faro-firefox.xpi</code>.</li>
+        <li>Firefox la quita al cerrarse: para tenerla siempre, instalala desde la tienda cuando esté disponible.</li>
+      </ol>
+    </div>
+
+    <h2>Privacidad</h2>
+    <p class="destacado">FARO no tiene servidores, cuentas, publicidad ni analítica. Tu proyecto queda en tu navegador y, si lo elegís, en tu propio Drive. Con Google, FARO solo puede ver los archivos que crea y los Docs que vos elegís; no ve el resto de tu Drive. <a href="privacidad.html">Política de privacidad completa</a>.</p>
+
+    <h2>Preguntas frecuentes</h2>
+    <details><summary>¿Cuesta algo?</summary><p>No. FARO es gratuito y de código abierto (licencia MIT). Las funciones de IA son opcionales y usan tu propia clave gratuita de Gemini.</p></details>
+    <details><summary>Google me dice «Google no verificó esta app»</summary><p>Puede aparecer mientras FARO está en etapa de prueba. Tocá <b>Avanzado → Ir a FARO</b>. El permiso que pide es solo para los archivos que uses con FARO.</p></details>
+    <details><summary>¿Qué ve FARO de mi Drive?</summary><p>Solo la carpeta «FARO» que él mismo crea, sus respaldos y los Docs a los que le das acceso uno por uno con el selector de Google. Nada más.</p></details>
+    <details><summary>¿Cómo desconecto mi cuenta?</summary><p>Desde el botón <b>G</b> de FARO → Desconectar, o en <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p></details>
+    <details><summary>¿Puedo perder mi trabajo?</summary><p>Tu proyecto vive en el navegador: si borrás los datos del navegador o desinstalás la extensión, se pierde. Hacé respaldos seguido (<b>Respaldar / Descargar datos</b>) o activá la copia automática en Drive.</p></details>
+    <details><summary>¿Funciona en el celular?</summary><p>En Firefox para Android, sí. La app de Google Docs para celular no muestra extensiones, así que para codificar dentro de los Docs conviene usar la computadora.</p></details>
+    <details><summary>Encontré un problema o tengo una idea</summary><p>Contanos en <a href="https://github.com/farocuali/Faro/issues/new/choose">GitHub</a> (plantillas «Algo no funciona» y «Propuesta») o escribinos a <a href="mailto:Faro.cuali@gmail.com">Faro.cuali@gmail.com</a>.</p></details>
+
+    <p class="nota" style="margin-top:32px">Micaela Gueler y Rocío Wegman · Escuela IDAES, UNSAM · <a href="https://github.com/farocuali/Faro">Código fuente</a> · <a href="privacidad.html">Privacidad</a></p>
+  </section>
+
+  <hr>
+
+  <!-- ============================== ENGLISH ============================== -->
+  <section id="en" lang="en">
+    <h1>FARO extension</h1>
+    <p class="bajada">Full FARO in your browser, plus coding inside Google Docs and capturing web pages. Free, no accounts, no servers.</p>
+
+    <h2>Install it</h2>
+    <div class="tiendas" data-tiendas>
+      <span class="tienda" data-tienda="firefox">Firefox<small>Coming soon</small></span>
+      <span class="tienda" data-tienda="edge">Microsoft Edge<small>Coming soon</small></span>
+    </div>
+    <p class="nota">Works on desktop (Windows, Mac, Linux) and on Firefox for Android. Until it is in the stores, you can try it by installing it by hand (see “Install it by hand” below).</p>
+
+    <h2>How is it different from FARO web?</h2>
+    <table>
+      <tr><th></th><th>FARO web</th><th>FARO extension</th></tr>
+      <tr><td>How you use it</td><td>Open <a href="./">farocuali.github.io/Faro</a></td><td>Install it once in your browser</td></tr>
+      <tr><td>Full analysis (codes, memos, networks, citations, bibliography)</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Code inside Google Docs</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Capture fragments from web pages</td><td>No</td><td>Yes</td></tr>
+      <tr><td>Save to Drive and create result Google Docs</td><td>No</td><td>Yes (optional)</td></tr>
+      <tr><td>Inter-coder agreement, saturation, coding appendix</td><td>No</td><td>Yes</td></tr>
+    </table>
+    <p class="nota">Each keeps its own project in the browser. To move a project from the web version, see “Move my project from FARO web” below.</p>
+
+    <h2>Getting started</h2>
+    <h3>1. Open full FARO</h3>
+    <p><b>Right-click</b> the lighthouse icon in the browser toolbar → <b>Open FARO</b>. It opens in its own tab. A left click opens the side panel (web captures and bibliography).</p>
+    <h3>2. Connect Google (optional)</h3>
+    <p>In FARO, click the <b>G</b> button (top right) → <b>Connect with Google</b> and pick your account. Codes are then stored inside your Docs and you can back up the project to your Drive. Without Google, FARO still works, but codes stay in FARO only.</p>
+    <h3>3. Code in Google Docs</h3>
+    <ol>
+      <li>Open any Google Doc: the <b>FARO</b> button appears at the bottom right.</li>
+      <li>The first time, with Google connected, the panel offers <b>Give FARO access to this Doc</b>: Google's picker opens, you choose that document and you're done. Once per Doc.</li>
+      <li>Select a fragment, copy it (<kbd>Ctrl</kbd>+<kbd>C</kbd>) and type the code in the panel. It gets highlighted in the code's colour.</li>
+      <li>Shortcuts: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>1…9</kbd> apply your favourite codes. The ✎ button adds a memo to the fragment.</li>
+      <li>In FARO, <b>Sync with the Doc</b> brings everything coded into your project.</li>
+    </ol>
+    <h3>4. Capture web pages (digital ethnography)</h3>
+    <p>Select text on any page → right-click → <b>Send to FARO</b> (or <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>). It is saved with its address and date for citation. Code it from the side panel and send it to the project.</p>
+    <h3>5. Cite in your thesis</h3>
+    <p>In the Docs panel, <b>Cite in your text</b>: pick a code and copy any of its fragments as a ready-to-paste quote with source and date (pseudonymised if you set pseudonyms).</p>
+
+    <h2>Move my project from FARO web</h2>
+    <ol>
+      <li>In FARO web: <b>Backup / Download data</b>. A <code>.json</code> file is downloaded.</li>
+      <li>In the extension: open full FARO → <b>Import backup</b> (<i>Importar respaldo</i>) and pick that file.</li>
+    </ol>
+
+    <h2>Install it by hand (to try it)</h2>
+    <div class="caja">
+      <h3>Chrome, Edge or Brave</h3>
+      <ol>
+        <li>Download and unzip the FARO package for Chrome.</li>
+        <li>Open <code>chrome://extensions</code> (Edge: <code>edge://extensions</code>; Brave: <code>brave://extensions</code>).</li>
+        <li>Turn on <b>Developer mode</b> → <b>Load unpacked</b> → choose the <code>faro</code> folder.</li>
+        <li>Don't delete or move that folder: the browser runs the extension from it.</li>
+      </ol>
+      <h3>Firefox</h3>
+      <ol>
+        <li>Open <code>about:debugging#/runtime/this-firefox</code> → <b>Load Temporary Add-on…</b> → choose <code>faro-firefox.xpi</code>.</li>
+        <li>Firefox removes it when it closes: to keep it, install it from the store once available.</li>
+      </ol>
+    </div>
+
+    <h2>Privacy</h2>
+    <p class="destacado">FARO has no servers, accounts, ads or analytics. Your project stays in your browser and, if you choose, in your own Drive. With Google, FARO can only see the files it creates and the Docs you choose; it can't see the rest of your Drive. <a href="privacidad.html#en">Full privacy policy</a>.</p>
+
+    <h2>FAQ</h2>
+    <details><summary>Does it cost anything?</summary><p>No. FARO is free and open source (MIT licence). AI features are optional and use your own free Gemini key.</p></details>
+    <details><summary>Google says “Google hasn't verified this app”</summary><p>It may appear while FARO is in its testing stage. Click <b>Advanced → Go to FARO</b>. The permission it asks for only covers the files you use with FARO.</p></details>
+    <details><summary>What can FARO see in my Drive?</summary><p>Only the “FARO” folder it creates, its backups and the Docs you give it access to one by one with Google's picker. Nothing else.</p></details>
+    <details><summary>How do I disconnect my account?</summary><p>From FARO's <b>G</b> button → Disconnect, or at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p></details>
+    <details><summary>Can I lose my work?</summary><p>Your project lives in the browser: clearing browser data or uninstalling the extension deletes it. Back up often (<b>Backup / Download data</b>) or turn on automatic copies to Drive.</p></details>
+    <details><summary>Does it work on phones?</summary><p>On Firefox for Android, yes. The Google Docs phone app doesn't show extensions, so coding inside Docs works best on a computer.</p></details>
+    <details><summary>I found a problem or have an idea</summary><p>Tell us on <a href="https://github.com/farocuali/Faro/issues/new/choose">GitHub</a> or write to <a href="mailto:Faro.cuali@gmail.com">Faro.cuali@gmail.com</a>.</p></details>
+
+    <p class="nota" style="margin-top:32px">Micaela Gueler and Rocío Wegman · Escuela IDAES, UNSAM · <a href="https://github.com/farocuali/Faro">Source code</a> · <a href="privacidad.html#en">Privacy</a></p>
+  </section>
+</main>
+</body>
+</html>
